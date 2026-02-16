@@ -13,6 +13,7 @@ public:
 	virtual ~ISteeringBehavior() = default;
 
 	// Override to implement your own behavior
+	[[nodiscard]]
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent & Agent) = 0;
 
 	void SetTarget(const FTargetData& NewTarget) { Target = NewTarget; }
@@ -23,6 +24,14 @@ public:
 
 protected:
 	FTargetData Target;
+};
+
+class Seek : public ISteeringBehavior
+{
+public:
+	Seek() = default;
+	
+	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
 };
 
 // Your own SteeringBehaviors should follow here...
