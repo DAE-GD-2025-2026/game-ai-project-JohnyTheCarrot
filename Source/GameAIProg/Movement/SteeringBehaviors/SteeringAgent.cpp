@@ -29,6 +29,8 @@ void ASteeringAgent::Tick(float DeltaTime)
 	if (SteeringBehavior)
 	{
 		SteeringOutput output = SteeringBehavior->CalculateSteering(DeltaTime, *this);
+		if (GetDebugRenderingEnabled())
+			SteeringBehavior->DebugRender(output, *this);
 		AddMovementInput(FVector{output.LinearVelocity, 0.f});
 	}
 }

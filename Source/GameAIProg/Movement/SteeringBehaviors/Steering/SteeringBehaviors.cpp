@@ -19,10 +19,23 @@ SteeringOutput Seek::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	return Result;
 }
 
+void Seek::DebugRender(SteeringOutput const &Output, ASteeringAgent const& Agent) const
+{
+	DrawDebugLine(
+		Agent.GetWorld(), 
+		Agent.GetActorLocation(), 
+		Agent.GetActorLocation() + UE::Math::TVector{Output.LinearVelocity, 0.},
+		FColor::Blue);
+}
+
 SteeringOutput Flee::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
 	auto Seek = Seek::CalculateSteering(DeltaT, Agent);
 	Seek.LinearVelocity = -Seek.LinearVelocity;
 	
 	return Seek;
+}
+
+void Flee::DebugRender(SteeringOutput const &Output, ASteeringAgent const& Agent) const
+{
 }
