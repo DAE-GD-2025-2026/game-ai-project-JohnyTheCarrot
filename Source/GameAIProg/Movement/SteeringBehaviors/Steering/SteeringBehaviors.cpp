@@ -3,7 +3,6 @@
 
 //SEEK
 //*******
-// TODO: Do the Week01 assignment :^)
 SteeringOutput Seek::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
 	
@@ -18,4 +17,12 @@ SteeringOutput Seek::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	Result.LinearVelocity = ToTargetVector * Agent.GetMaxLinearSpeed();
 	
 	return Result;
+}
+
+SteeringOutput Flee::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
+{
+	auto Seek = Seek::CalculateSteering(DeltaT, Agent);
+	Seek.LinearVelocity = -Seek.LinearVelocity;
+	
+	return Seek;
 }
