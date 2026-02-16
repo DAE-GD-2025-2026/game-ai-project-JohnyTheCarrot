@@ -273,7 +273,7 @@ void ALevel_SteeringBehaviors::UpdateTarget(ImGui_Agent& Agent)
 
 void ALevel_SteeringBehaviors::RefreshAgentTargets(unsigned int IndexRemoved)
 {
-	for (UINT i = 0; i < SteeringAgents.size(); ++i)
+	for (uint32 i = 0; i < SteeringAgents.size(); ++i)
 	{
 		if (i >= IndexRemoved)
 		{

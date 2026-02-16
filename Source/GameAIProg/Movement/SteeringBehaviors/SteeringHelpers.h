@@ -77,7 +77,7 @@ struct SteeringOutput final
 	float AngularVelocity{0.f};
 	bool IsValid{true};
 
-	SteeringOutput(const FVector2D& linearVelocity = {0.f, 0.f}, float angularVelocity = {0.f})
+	SteeringOutput(const FVector2D& linearVelocity = {0.f, 0.f}, float angularVelocity = 0.f)
 	{
 		LinearVelocity = linearVelocity;
 		AngularVelocity = angularVelocity;
