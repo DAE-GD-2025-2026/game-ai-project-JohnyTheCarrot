@@ -14,7 +14,7 @@ public:
 
 	// Override to implement your own behavior
 	[[nodiscard]]
-	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent & Agent) = 0;
+	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent &Agent) = 0;
 
 	void SetTarget(const FTargetData& NewTarget) { Target = NewTarget; }
 	
@@ -41,11 +41,23 @@ public:
 class Flee : public Seek
 {
 public:
-	Flee() = default;
-	
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
 	
 	virtual void DebugRender(SteeringOutput const &Output, ASteeringAgent const &Agent) const override;
+};
+
+class Wander : public Seek
+{
+	float Radius{50.f};
+	float Distance{80.f};
+	
+public:
+	using Seek::Seek;
+	virtual ~Wander() override = default;
+	
+	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
+	
+	virtual void DebugRender(SteeringOutput const& Output, ASteeringAgent const& Agent) const override;
 };
 
 // Your own SteeringBehaviors should follow here...
