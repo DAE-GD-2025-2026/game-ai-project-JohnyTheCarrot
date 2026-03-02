@@ -41,8 +41,8 @@ void ASteeringAgent::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
 
-void ASteeringAgent::SetSteeringBehavior(ISteeringBehavior* NewSteeringBehavior)
+void ASteeringAgent::SetSteeringBehavior(ISteeringBehavior *pNewSteeringBehavior)
 {
-	SteeringBehavior = NewSteeringBehavior;
+	SteeringBehavior = pNewSteeringBehavior;
 }
 

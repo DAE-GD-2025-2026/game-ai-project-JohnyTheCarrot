@@ -54,7 +54,7 @@ public:
 
 protected:
 
-	ISteeringBehavior* SteeringBehavior{nullptr}; // non-owning
+	ISteeringBehavior *SteeringBehavior{nullptr}; // non-owning
 	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -69,5 +69,17 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
-	void SetSteeringBehavior(ISteeringBehavior* NewSteeringBehavior);
+	void SetSteeringBehavior(ISteeringBehavior *pNewSteeringBehavior);
+	
+	[[nodiscard]]
+	FVector ToDebugDrawVector(FVector Vec) const
+	{
+		return FVector{Vec.X, Vec.Y, GetActorLocation().Z - 50.f};
+	}
+	
+	[[nodiscard]]
+	FVector ToDebugDrawVector(FVector2D Vec) const
+	{
+		return FVector{Vec.X, Vec.Y, GetActorLocation().Z - 50.f};
+	}
 };
