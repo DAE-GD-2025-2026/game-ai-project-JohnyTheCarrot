@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <initializer_list>
 
 #include "../Steering/SteeringBehaviors.h"
 
@@ -10,27 +11,29 @@ class BlendedSteering final: public ISteeringBehavior
 public:
 	struct WeightedBehavior
 	{
-		ISteeringBehavior* pBehavior = nullptr;
-		float Weight = 0.f;
-
+		ISteeringBehavior* pBehavior_;
+		float Weight_;
+		
 		WeightedBehavior(ISteeringBehavior* const pBehavior, float Weight) :
-			pBehavior(pBehavior),
-			Weight(Weight)
-		{};
+			pBehavior_{pBehavior},
+			Weight_{Weight}
+		{
+			ensureAlwaysMsgf(Weight >= 0 && Weight <= 1.f, TEXT("Weight must be between 0 and 1, was %f"), Weight);
+		}
 	};
 
-	BlendedSteering(const std::vector<WeightedBehavior>& WeightedBehaviors);
+	explicit BlendedSteering(std::initializer_list<WeightedBehavior> WeightedBehaviors);
 
-	void AddBehaviour(const WeightedBehavior& WeightedBehavior) { WeightedBehaviors.push_back(WeightedBehavior); }
+	void AddBehaviour(WeightedBehavior WeightedBehavior) { WeightedBehaviors.emplace_back(WeightedBehavior); }
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
 
-	float* GetWeight(ISteeringBehavior* const SteeringBehavior);
+	[[nodiscard]]
+	float* GetWeight(ISteeringBehavior const* SteeringBehavior);
 	
-	// returns a reference to the weighted behaviors, can be used to adjust weighting. Is not intended to alter the behaviors themselves.
-	std::vector<WeightedBehavior>& GetWeightedBehaviorsRef() { return WeightedBehaviors; }
+	virtual void DebugRender(SteeringOutput const& Output, ASteeringAgent const& Agent) const override;
 
 private:
-	std::vector<WeightedBehavior> WeightedBehaviors = {};
+	std::vector<WeightedBehavior> WeightedBehaviors;
 
 	// using ISteeringBehavior::SetTarget; // made private because targets need to be set on the individual behaviors, not the combined behavior
 };
