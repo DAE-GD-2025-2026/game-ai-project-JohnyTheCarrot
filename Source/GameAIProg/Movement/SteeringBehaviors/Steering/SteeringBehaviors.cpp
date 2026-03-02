@@ -5,7 +5,6 @@
 //*******
 SteeringOutput Seek::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
-	
 	auto const ToTargetVector{[this, &Agent]
 	{
 		UE::Math::TVector2 DeltaPos{Target.Position.X - Agent.GetActorLocation().X, Target.Position.Y - Agent.GetActorLocation().Y};
@@ -14,7 +13,7 @@ SteeringOutput Seek::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	}()};
 	
 	SteeringOutput Result{};
-	Result.LinearVelocity = ToTargetVector * Agent.GetMaxLinearSpeed();
+	Result.LinearVelocity = ToTargetVector;
 	
 	return Result;
 }
