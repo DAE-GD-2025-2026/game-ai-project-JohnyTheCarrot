@@ -26,7 +26,7 @@ void ASteeringAgent::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (SteeringBehavior)
+	if (!IsDirected && SteeringBehavior)
 	{
 		SteeringOutput const Output = SteeringBehavior->CalculateSteering(DeltaTime, *this);
 		AddMovementInput(FVector{Output.LinearVelocity, 0.f});
@@ -42,4 +42,13 @@ void ASteeringAgent::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 void ASteeringAgent::SetSteeringBehavior(ISteeringBehavior *pNewSteeringBehavior)
 {
 	SteeringBehavior = pNewSteeringBehavior;
+}
+
+void ASteeringAgent::PerformSteer(float DeltaTime)
+{
+	if (!IsDirected)
+		UE_LOG(LogTemp, Warning, TEXT("Agent is being directed by an external source, but is not marked as directed"));
+	
+	SteeringOutput const Output = SteeringBehavior->CalculateSteering(DeltaTime, *this);
+	AddMovementInput(FVector{Output.LinearVelocity, 0.f});
 }

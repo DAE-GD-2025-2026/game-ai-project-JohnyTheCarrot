@@ -51,6 +51,11 @@ class GAMEAIPROG_API ASteeringAgent : public ABaseAgent
 public:
 	// Sets default values for this character's properties
 	ASteeringAgent();
+	
+	UPROPERTY(EditAnywhere)
+	// false = Tick() will execute behaviors
+	// true = behaviors for this agent invoked by something else
+	bool IsDirected = false;
 
 protected:
 
@@ -71,4 +76,5 @@ public:
 
 	void SetSteeringBehavior(ISteeringBehavior *pNewSteeringBehavior);
 	
+	void PerformSteer(float DeltaTime);
 };
