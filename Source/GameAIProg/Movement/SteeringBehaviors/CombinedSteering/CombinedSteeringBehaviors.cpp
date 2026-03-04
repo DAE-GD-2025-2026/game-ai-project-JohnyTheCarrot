@@ -30,16 +30,9 @@ SteeringOutput BlendedSteering::CalculateSteering(float DeltaT, ASteeringAgent& 
 	
 	BlendedSteering.LinearVelocity /= WeightsSum;
 	
-	// TODO: Calculate the weighted average steeringbehavior
+	// TODO: Calculate weighted sum for angle, too
 	
-	// TODO: Add debug drawing
-	DrawDebugLine(
-		Agent.GetWorld(),
-		Agent.GetTransform().GetLocation(),
-		Agent.GetTransform().GetLocation()
-			+ FVector{BlendedSteering.LinearVelocity.X, BlendedSteering.LinearVelocity.Y, 0.f},
-		FColor::Purple, false, -1, 0, 2.f
-	);
+	Agent.DebugLineRelative(BlendedSteering.LinearVelocity, FColor::Purple);
 
 	return BlendedSteering;
 }
@@ -57,14 +50,6 @@ float* BlendedSteering::GetWeight(ISteeringBehavior const* SteeringBehavior)
 		return &Iter->Weight_;
 	
 	return nullptr;
-}
-
-void BlendedSteering::DebugRender(SteeringOutput const& Output, ASteeringAgent const& Agent) const
-{
-	for (auto const &Behavior : WeightedBehaviors)
-	{
-		Behavior.pBehavior_->DebugRender(Output, Agent);
-	}
 }
 
 //*****************

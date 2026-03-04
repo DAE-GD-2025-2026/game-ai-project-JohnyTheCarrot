@@ -71,15 +71,4 @@ public:
 
 	void SetSteeringBehavior(ISteeringBehavior *pNewSteeringBehavior);
 	
-	[[nodiscard]]
-	FVector ToDebugDrawVector(FVector Vec) const
-	{
-		return FVector{Vec.X, Vec.Y, GetActorLocation().Z - 50.f};
-	}
-	
-	[[nodiscard]]
-	FVector ToDebugDrawVector(FVector2D Vec) const
-	{
-		return FVector{Vec.X, Vec.Y, GetActorLocation().Z - 50.f};
-	}
 };

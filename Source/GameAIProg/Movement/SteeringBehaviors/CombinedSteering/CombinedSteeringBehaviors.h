@@ -29,8 +29,6 @@ public:
 
 	[[nodiscard]]
 	float* GetWeight(ISteeringBehavior const* SteeringBehavior);
-	
-	virtual void DebugRender(SteeringOutput const& Output, ASteeringAgent const& Agent) const override;
 
 private:
 	std::vector<WeightedBehavior> WeightedBehaviors;

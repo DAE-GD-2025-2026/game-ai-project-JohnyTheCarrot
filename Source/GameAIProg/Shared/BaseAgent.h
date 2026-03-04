@@ -38,12 +38,19 @@ public:
 	
 	// BaseAgent Interface
 	FVector2D GetPosition() const { return FVector2D{GetActorLocation().X, GetActorLocation().Y}; }
+	FVector2D GetForward() const { return FVector2D{GetActorForwardVector().X, GetActorForwardVector().Y}; }
 	float GetRotation() const { return GetActorRotation().Yaw; }
 	
 	float GetMaxLinearSpeed() const { return GetCharacterMovement()->GetMaxSpeed(); }
 	void SetMaxLinearSpeed(float MaxSpeed) { GetCharacterMovement()->MaxWalkSpeed = MaxSpeed; }
 
 	FVector2D GetLinearVelocity() const { return FVector2D{GetCharacterMovement()->Velocity}; }
+	
+	[[nodiscard]]
+	double GetLinearSpeed() const
+	{
+		return GetLinearVelocity().Length();
+	}
 
 	float GetMaxAngularSpeed() const { return GetCharacterMovement()->RotationRate.Yaw; }
 	void SetMaxAngularSpeed(float maxAngularSpeed) { GetCharacterMovement()->RotationRate.Yaw = maxAngularSpeed; }
@@ -58,4 +65,26 @@ public:
 
 	bool GetDebugRenderingEnabled() const { return bIsDebugRenderingEnabled; }
 	void SetDebugRenderingEnabled(bool IsEnabled) { this->bIsDebugRenderingEnabled = IsEnabled; }
+	
+	[[nodiscard]]
+	FVector ToDebugDrawVector(FVector Vec) const
+	{
+		return FVector{Vec.X, Vec.Y, GetActorLocation().Z - 50.f};
+	}
+	
+	[[nodiscard]]
+	FVector ToDebugDrawVector(FVector2D Vec) const
+	{
+		return FVector{Vec.X, Vec.Y, GetActorLocation().Z - 50.f};
+	}
+	
+	void DebugLine(FVector2D From, FVector2D To, FColor Color) const;
+	
+	void DebugLineFrom(FVector2D To, FColor Color) const;
+	void DebugLineRelative(FVector2D Vec, FColor Color) const;
+	
+	void DebugCircle(FVector2D At, float Radius, FColor Color) const;
+	void DebugCircleFrom(float Radius, FColor Color) const;
+	
+	void DebugPoint(FVector2D Point, FColor Color) const;
 };

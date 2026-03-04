@@ -28,7 +28,7 @@ public:
 	~Flock();
 
 	void Tick(float DeltaTime);
-	void RenderDebug();
+	void RenderDebug() const;
 	void ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize);
 
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
