@@ -12,6 +12,7 @@
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
 #include "../SpacePartitioning/SpacePartitioning.h"
 #endif
+#include "Movement/SteeringBehaviors/Flocking/FlockingSteeringBehaviors.h"
 
 class Flock final
 {
@@ -36,40 +37,70 @@ public:
 #else // No space partitioning
 	void RegisterNeighbors(ASteeringAgent* const Agent);
 	int GetNrOfNeighbors() const { return NrOfNeighbors; }
-	const TArray<ASteeringAgent*>& GetNeighbors() const { return Neighbors; }
 #endif // USE_SPACE_PARTITIONING
 
-	FVector2D GetAverageNeighborPos() const;
-	FVector2D GetAverageNeighborVelocity() const;
+	void UpdateNeighborList();
 
 	void SetTarget_Seek(FSteeringParams const & Target);
 
 private:
 	// For debug rendering purposes
 	UWorld* pWorld{nullptr};
+	struct FlockBehavior final
+	{
+		std::unique_ptr<Cohesion> pCohesion;
+		std::unique_ptr<Separation> pSeparation;
+		std::unique_ptr<Alignment> pAlignment;
+		std::unique_ptr<Wander> pWander;
+		std::unique_ptr<BlendedSteering> pSteeringBehavior;
+		
+		explicit FlockBehavior(Flock const &Flock)
+			: pCohesion{std::make_unique<Cohesion>(Flock)} 
+			, pSeparation{std::make_unique<Separation>(Flock)}
+			, pAlignment{std::make_unique<Alignment>(Flock)}
+			, pWander{std::make_unique<Wander>()}
+			, pSteeringBehavior{[this]
+			{
+				using Behavior = BlendedSteering::WeightedBehavior;
+				return std::make_unique<BlendedSteering>(BlendedSteering{
+					Behavior{pCohesion.get(), .9f},
+					Behavior{pSeparation.get(), .8f},
+					Behavior{pAlignment.get(), .7f},
+					Behavior{pWander.get(), .5f},
+				});
+			}()}
+		{}
+		
+		[[nodiscard]]
+		BlendedSteering *GetBlendedSteering() const noexcept
+		{
+			return pSteeringBehavior.get();
+		}
+	};
 	
 	int FlockSize{0};
-	TArray<ASteeringAgent*> Agents{};
+	std::vector<ASteeringAgent*> Agents{};
+	TUniquePtr<FlockBehavior> pBehaviors{MakeUnique<FlockBehavior>(*this)};
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
 	//std::unique_ptr<CellSpace> pPartitionedSpace{};
 	//int NrOfCellsX{ 10 };
 	//TArray<FVector2D> OldPositions{};
 #else // No space partitioning
-	TArray<ASteeringAgent*> Neighbors{};
+	struct FlockAgentNeighborInfo final
+	{
+		FVector2D AveragePos{};
+		int NumNeighbors{};
+		FVector2D AverageDirection{};
+		FVector2D AverageVelocity{};
+	};
+	
+	std::vector<FlockAgentNeighborInfo> Neighbors{};
 #endif // USE_SPACE_PARTITIONING
 	
 	float NeighborhoodRadius{200.f};
 	int NrOfNeighbors{0};
 
 	ASteeringAgent* pAgentToEvade{nullptr};
-	
-	//Steering Behaviors
-	//std::unique_ptr<Separation> pSeparationBehavior{};
-	//std::unique_ptr<Cohesion> pCohesionBehavior{};
-	//std::unique_ptr<VelocityMatch> pVelMatchBehavior{};
-	//std::unique_ptr<Seek> pSeekBehavior{};
-	//std::unique_ptr<Wander> pWanderBehavior{};
-	//std::unique_ptr<Evade> pEvadeBehavior{};
 	
 	std::unique_ptr<BlendedSteering> pBlendedSteering{};
 	std::unique_ptr<PrioritySteering> pPrioritySteering{};

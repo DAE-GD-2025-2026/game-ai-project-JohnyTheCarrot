@@ -14,33 +14,90 @@ Flock::Flock(
 	, FlockSize{ FlockSize }
 	, pAgentToEvade{pAgentToEvade}
 {
-	Agents.SetNum(FlockSize);
-
- // TODO: initialize the flock and the memory pool
+	Agents.resize(FlockSize);
+	Neighbors.resize(FlockSize);
+	
+	FActorSpawnParameters ActorSpawnParams;
+	ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	
+	auto const SpawnSize = WorldSize - 100;
+	float Increment = SpawnSize * 2.f / FMath::Sqrt(static_cast<float>(FlockSize));
+	FVector SpawnPos{-SpawnSize, -SpawnSize, 300.f};
+	for (auto *&Agent : Agents)
+	{
+		// Agent = pWorld->SpawnActor<ASteeringAgent>(AgentClass, ActorSpawnParams);
+		Agent = pWorld->SpawnActor<ASteeringAgent>(
+			AgentClass, SpawnPos, FRotator::ZeroRotator, ActorSpawnParams
+		);
+		SpawnPos.X += Increment;
+		if (SpawnPos.X > SpawnSize)
+		{
+			SpawnPos.Y += Increment;
+			SpawnPos.X = -SpawnSize;
+		}
+		
+		Agent->SetDebugRenderingEnabled(false);
+		
+		Agent->SetSteeringBehavior(pBehaviors->GetBlendedSteering());
+	}
+	Agents[0]->SetDebugRenderingEnabled(true);
 }
 
 Flock::~Flock()
 {
- // TODO: Cleanup any additional data
+	for (auto *const Agent : Agents)
+	{
+		Agent->Destroy();
+	}
 }
 
 void Flock::Tick(float DeltaTime)
 {
- // TODO: update the flock
- // TODO: for every agent:
-  // TODO: register the neighbors for this agent (-> fill the memory pool with the neighbors for the currently evaluated agent)
-  // TODO: update the agent (-> the steeringbehaviors use the neighbors in the memory pool)
-  // TODO: trim the agent to the world
+    // TODO: trim the agent to the world
+	UpdateNeighborList();
+	
+	for (size_t index = 0; index < Agents.size(); ++index)
+	{
+		if (Neighbors[index].NumNeighbors > 0)
+		{
+			FTargetData Target;
+			Target.Position = Neighbors[index].AveragePos / Neighbors[index].NumNeighbors;
+			pBehaviors->pCohesion->SetTarget(Target);
+		
+			Target.LinearVelocity = Neighbors[index].AverageDirection;
+			pBehaviors->pSeparation->SetTarget(Target);
+		
+			Target.LinearVelocity = Neighbors[index].AverageVelocity / Neighbors[index].NumNeighbors;
+			pBehaviors->pAlignment->SetTarget(Target);
+		}
+	}
 }
 
 void Flock::RenderDebug()
 {
- // TODO: Render all the agents in the flock
+	FRotator const DesiredAngle{90, 0, 0};
+	FVector const YVector = DesiredAngle.RotateVector(FVector(0, 1, 0));
+	FVector const ZVector = DesiredAngle.RotateVector(FVector(0, 0, 1));
+	
+	for (size_t index = 0; index < Agents.size(); ++index)
+	{
+		auto &Agent = *Agents[index];
+		
+		FColor Color = Neighbors[index].NumNeighbors > 0 ? FColor::Green : FColor::Silver;
+		if (Agent.GetDebugRenderingEnabled())
+			DrawDebugCircle(
+				Agent.GetWorld(),
+				Agent.ToDebugDrawVector(Agent.GetActorLocation()),
+				NeighborhoodRadius,
+				30,
+				Color,
+				false, -1, 0, 0, YVector, ZVector
+			);
+	}
 }
 
 void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 {
-#ifdef PLATFORM_WINDOWS
 #pragma region UI
 	//UI
 	{
@@ -78,7 +135,24 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 
   // TODO: implement ImGUI checkboxes for debug rendering here
 
+		auto constexpr SliderMax{2.f};
 		ImGui::Text("Behavior Weights");
+		{
+			auto *Weight = pBehaviors->GetBlendedSteering()->GetWeight(pBehaviors->pCohesion.get());
+			ImGui::SliderFloat("Cohesion", Weight, 0.f, SliderMax);
+		}
+		{
+			auto *Weight = pBehaviors->GetBlendedSteering()->GetWeight(pBehaviors->pSeparation.get());
+			ImGui::SliderFloat("Separation", Weight, 0.f, SliderMax);
+		}
+		{
+			auto *Weight = pBehaviors->GetBlendedSteering()->GetWeight(pBehaviors->pAlignment.get());
+			ImGui::SliderFloat("Alignment", Weight, 0.f, SliderMax);
+		}
+		{
+			auto *Weight = pBehaviors->GetBlendedSteering()->GetWeight(pBehaviors->pWander.get());
+			ImGui::SliderFloat("Wander", Weight, 0.f, SliderMax);
+		}
 		ImGui::Spacing();
 
   // TODO: implement ImGUI sliders for steering behavior weights here
@@ -86,7 +160,6 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 		ImGui::End();
 	}
 #pragma endregion
-#endif
 }
 
 void Flock::RenderNeighborhood()
@@ -101,26 +174,40 @@ void Flock::RegisterNeighbors(ASteeringAgent* const pAgent)
 }
 #endif
 
-FVector2D Flock::GetAverageNeighborPos() const
+void Flock::UpdateNeighborList()
 {
-	FVector2D avgPosition = FVector2D::ZeroVector;
-
- // TODO: Implement
+	for (auto &Neighbor : Neighbors)
+		Neighbor = {};
 	
-	return avgPosition;
-}
-
-FVector2D Flock::GetAverageNeighborVelocity() const
-{
-	FVector2D avgVelocity = FVector2D::ZeroVector;
-
- // TODO: Implement
-
-	return avgVelocity;
+	int Iterations = 0;
+	for (auto AgentIt = Agents.cbegin(); AgentIt != Agents.cend(); ++AgentIt)
+	{
+		if (AgentIt + 1 == Agents.cend()) break;
+		
+		auto const AgentIndex = std::distance(Agents.cbegin(), AgentIt);
+		
+		for (auto NeighborAgentIt = AgentIt + 1; NeighborAgentIt != Agents.end(); ++NeighborAgentIt)
+		{
+			auto const NeighborIndex = std::distance(Agents.cbegin(), NeighborAgentIt);
+			
+			auto const Distance = (*AgentIt)->GetHorizontalDistanceTo(*NeighborAgentIt);
+			++Iterations;
+			if (Distance > NeighborhoodRadius) continue;
+			
+			Neighbors[AgentIndex].AveragePos += (*NeighborAgentIt)->GetPosition();
+			Neighbors[AgentIndex].AverageDirection += ((*AgentIt)->GetPosition() - (*NeighborAgentIt)->GetPosition()) / Distance;
+			Neighbors[AgentIndex].AverageVelocity += (*NeighborAgentIt)->GetLinearVelocity();
+			++Neighbors[AgentIndex].NumNeighbors;
+			
+			Neighbors[NeighborIndex].AveragePos += (*AgentIt)->GetPosition();
+			Neighbors[NeighborIndex].AverageDirection += ((*NeighborAgentIt)->GetPosition() - (*AgentIt)->GetPosition()) / Distance;
+			Neighbors[NeighborIndex].AverageVelocity += (*AgentIt)->GetLinearVelocity();
+			++Neighbors[NeighborIndex].NumNeighbors;
+		}
+	}
 }
 
 void Flock::SetTarget_Seek(FSteeringParams const& Target)
 {
  // TODO: Implement
 }
-

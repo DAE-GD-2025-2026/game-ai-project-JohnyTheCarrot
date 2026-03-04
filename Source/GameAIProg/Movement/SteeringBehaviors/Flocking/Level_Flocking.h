@@ -1,6 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
-
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Flock.h"
@@ -23,7 +21,7 @@ protected:
 
 	bool bUseMouseTarget{true};
 
-	int const FlockSize{100};
+	int const FlockSize{500};
 
 	TUniquePtr<Flock> pFlock{};
 	

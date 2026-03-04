@@ -2,22 +2,58 @@
 #include "Movement/SteeringBehaviors/Steering/SteeringBehaviors.h"
 class Flock;
 
+class FlockBehavior
+{
+	Flock const *pFlock_;
+	
+protected:
+	[[nodiscard]]
+	Flock const &GetFlock() const noexcept { return *pFlock_; }
+	
+public:
+	explicit FlockBehavior(Flock const &Flock)
+		: pFlock_{&Flock}
+		{}
+	
+	virtual ~FlockBehavior() = default;
+};
+
 //COHESION - FLOCKING
 //*******************
-class Cohesion final : public Seek
+class Cohesion final : public Seek, protected FlockBehavior
 {
 public:
-	Cohesion(Flock* const pFlock) :pFlock(pFlock) {};
+	using FlockBehavior::FlockBehavior;
 
 	//Cohesion Behavior
-	SteeringOutput CalculateSteering(float deltaT, ASteeringAgent& pAgent) override;
-
-private:
-	Flock* pFlock = nullptr;
+	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
+	
+	virtual void DebugRender(SteeringOutput const& Output, ASteeringAgent const& Agent) const override;
 };
 
 //SEPARATION - FLOCKING
 //*********************
+class Separation final : public Flee, protected FlockBehavior
+{
+public:
+	using FlockBehavior::FlockBehavior;
+	
+	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
+	
+	virtual void DebugRender(SteeringOutput const& Output, ASteeringAgent const& Agent) const override;
+};
 
 //VELOCITY MATCH - FLOCKING
 //************************
+class Alignment final : public Flee, protected FlockBehavior
+{
+public:
+	explicit Alignment(Flock const &Flock)
+		: Flee{}
+		, FlockBehavior{Flock}
+		{}
+	
+	virtual ~Alignment() override = default;
+	
+	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
+};
