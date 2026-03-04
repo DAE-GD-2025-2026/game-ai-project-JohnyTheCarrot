@@ -29,6 +29,9 @@ Flock::Flock(
 		Agent = pWorld->SpawnActor<ASteeringAgent>(
 			AgentClass, SpawnPos, FRotator::ZeroRotator, ActorSpawnParams
 		);
+		ensure(Agent != nullptr);
+		
+		Agent->IsDirected = true;
 		SpawnPos.X += Increment;
 		if (SpawnPos.X > SpawnSize)
 		{
@@ -70,6 +73,8 @@ void Flock::Tick(float DeltaTime)
 			Target.LinearVelocity = Neighbors[index].AverageVelocity / Neighbors[index].NumNeighbors;
 			pBehaviors->pAlignment->SetTarget(Target);
 		}
+		
+		Agents[index]->PerformSteer(DeltaTime);
 	}
 }
 
