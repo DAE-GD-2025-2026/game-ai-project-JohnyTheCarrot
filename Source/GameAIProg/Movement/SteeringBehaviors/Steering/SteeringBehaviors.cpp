@@ -40,3 +40,18 @@ SteeringOutput Wander::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	return Seek::CalculateSteering(DeltaT, Agent);
 }
 
+SteeringOutput Pursuit::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
+{
+	auto const AgentToTargetVector = Target.Position - Agent.GetPosition();
+	auto const TimeToReachTarget = AgentToTargetVector.Length() / Agent.GetLinearSpeed();
+	
+	auto const PredictedTarget = Target.Position + TimeToReachTarget * Target.LinearVelocity;
+	
+	Agent.DebugLine(Target.Position, PredictedTarget, FColor::Cyan);
+	Agent.DebugLineFrom(PredictedTarget, FColor::Green);
+	
+	SteeringOutput Result{};
+	Result.LinearVelocity = PredictedTarget;
+	
+	return Result;
+}

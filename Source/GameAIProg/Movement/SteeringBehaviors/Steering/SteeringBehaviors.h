@@ -52,4 +52,12 @@ public:
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
 };
 
+class Pursuit : public Seek
+{
+public:
+	using Seek::Seek;
+	
+	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
+};
+
 // Your own SteeringBehaviors should follow here...
