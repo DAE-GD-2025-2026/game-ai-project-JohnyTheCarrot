@@ -15,16 +15,9 @@ SteeringOutput Seek::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	SteeringOutput Result{};
 	Result.LinearVelocity = ToTargetVector;
 	
+	Agent.DebugLineRelative(Result.LinearVelocity, FColor::Yellow);
+	
 	return Result;
-}
-
-void Seek::DebugRender(SteeringOutput const &Output, ASteeringAgent const& Agent) const
-{
-	DrawDebugLine(
-		Agent.GetWorld(), 
-		Agent.GetActorLocation(), 
-		Agent.GetActorLocation() + UE::Math::TVector{Output.LinearVelocity, 0.},
-		FColor::Blue);
 }
 
 SteeringOutput Flee::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
@@ -35,43 +28,15 @@ SteeringOutput Flee::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	return Seek;
 }
 
-void Flee::DebugRender(SteeringOutput const &Output, ASteeringAgent const& Agent) const
-{
-}
-
 SteeringOutput Wander::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
-	Target.Position = [this, &Agent]
-	{
-		auto Pos = Agent.GetActorLocation() + Agent.GetActorForwardVector() * Distance;
-		Pos += FMath::VRand() * Radius;
-		
-		return FVector2D{Pos.X, Pos.Y};
-	}();
+	auto const CircleCenter = Agent.GetPosition() + Agent.GetForward() * Distance;
+	auto const RandVec3d = FMath::VRand().GetSafeNormal2D();
+	Target.Position = CircleCenter + FVector2D{RandVec3d.X, RandVec3d.Y} * Radius;
+	
+	Agent.DebugCircle(CircleCenter, Radius, FColor::Yellow);
+	Agent.DebugLineFrom(Target.Position, FColor::Emerald);
 	
 	return Seek::CalculateSteering(DeltaT, Agent);
 }
 
-void Wander::DebugRender(SteeringOutput const& Output, ASteeringAgent const& Agent) const
-{
-	FRotator const DesiredAngle{90, 0, 0};
-	FVector const YVector = DesiredAngle.RotateVector(FVector(0, 1, 0));
-	FVector const ZVector = DesiredAngle.RotateVector(FVector(0, 0, 1));
-	
-	DrawDebugCircle(
-		Agent.GetWorld(),
-		Agent.ToDebugDrawVector(Agent.GetActorLocation() + Distance * Agent.GetActorForwardVector()),
-		Radius,
-		30,
-		FColor::Yellow,
-		false,
-		-1, 0, 0,
-		YVector, ZVector
-	);
-	DrawDebugPoint(
-		Agent.GetWorld(),
-		Agent.ToDebugDrawVector(FVector2D{Target.Position.X, Target.Position.Y}),
-		8.f,
-		FColor::Emerald
-	);
-}

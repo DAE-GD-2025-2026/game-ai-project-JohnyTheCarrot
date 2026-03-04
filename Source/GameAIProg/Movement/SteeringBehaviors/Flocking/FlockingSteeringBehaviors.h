@@ -27,8 +27,6 @@ public:
 
 	//Cohesion Behavior
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
-	
-	virtual void DebugRender(SteeringOutput const& Output, ASteeringAgent const& Agent) const override;
 };
 
 //SEPARATION - FLOCKING
@@ -39,8 +37,6 @@ public:
 	using FlockBehavior::FlockBehavior;
 	
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
-	
-	virtual void DebugRender(SteeringOutput const& Output, ASteeringAgent const& Agent) const override;
 };
 
 //VELOCITY MATCH - FLOCKING

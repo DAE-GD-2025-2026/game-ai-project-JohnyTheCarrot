@@ -21,8 +21,6 @@ public:
 	template<class T, std::enable_if_t<std::is_base_of_v<ISteeringBehavior, T>>* = nullptr>
 	T* As()
 	{ return static_cast<T*>(this); }
-	
-	virtual void DebugRender(SteeringOutput const &Output, ASteeringAgent const &Agent) const {}
 
 protected:
 	FTargetData Target;
@@ -34,16 +32,12 @@ public:
 	Seek() = default;
 	
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
-	
-	virtual void DebugRender(SteeringOutput const &Output, ASteeringAgent const &Agent) const override;
 };
 
 class Flee : public Seek
 {
 public:
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
-	
-	virtual void DebugRender(SteeringOutput const &Output, ASteeringAgent const &Agent) const override;
 };
 
 class Wander : public Seek
@@ -56,8 +50,6 @@ public:
 	virtual ~Wander() override = default;
 	
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
-	
-	virtual void DebugRender(SteeringOutput const& Output, ASteeringAgent const& Agent) const override;
 };
 
 // Your own SteeringBehaviors should follow here...

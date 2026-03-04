@@ -5,41 +5,22 @@
 
 //*******************
 //COHESION (FLOCKING)
-SteeringOutput Cohesion::CalculateSteering(float deltaT, ASteeringAgent& pAgent)
+SteeringOutput Cohesion::CalculateSteering(float deltaT, ASteeringAgent& Agent)
 {
-	return Seek::CalculateSteering(deltaT, pAgent);
-}
-
-void Cohesion::DebugRender(SteeringOutput const& Output, ASteeringAgent const& Agent) const
-{
-	DrawDebugLine(
-		Agent.GetWorld(),
-		Agent.ToDebugDrawVector(Agent.GetActorLocation()),
-		Agent.ToDebugDrawVector(Target.Position),
-		FColor::Cyan, false, -1, 0, 3.f
-	);
-	DrawDebugPoint(
-		Agent.GetWorld(),
-		Agent.ToDebugDrawVector(Target.Position),
-		7.f, FColor::Orange
-	);
+	Agent.DebugLineFrom(Target.Position, FColor::Cyan);
+	Agent.DebugPoint(Target.Position, FColor::Orange);
+	
+	return Seek::CalculateSteering(deltaT, Agent);
 }
 
 SteeringOutput Separation::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
 	SteeringOutput Output;
 	Output.LinearVelocity = Target.LinearVelocity;
+	
+	Agent.DebugLineRelative(Target.LinearVelocity, FColor::Red);
+	
 	return Output;
-}
-
-void Separation::DebugRender(SteeringOutput const& Output, ASteeringAgent const& Agent) const
-{
-	// DrawDebugLine(
-	// 	Agent.GetWorld(),
-	// 	Agent.GetTransform().GetLocation(),
-	// 	Agent.GetTransform().GetLocation() + FVector{Target.LinearVelocity.X, Target.LinearVelocity.Y, 0.f},
-	// 	FColor::Red, false, -1, 0, 4.f
-	// );
 }
 
 SteeringOutput Alignment::CalculateSteering(float DeltaT, ASteeringAgent& Agent)

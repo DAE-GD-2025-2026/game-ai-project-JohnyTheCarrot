@@ -73,26 +73,15 @@ void Flock::Tick(float DeltaTime)
 	}
 }
 
-void Flock::RenderDebug()
+void Flock::RenderDebug() const
 {
-	FRotator const DesiredAngle{90, 0, 0};
-	FVector const YVector = DesiredAngle.RotateVector(FVector(0, 1, 0));
-	FVector const ZVector = DesiredAngle.RotateVector(FVector(0, 0, 1));
-	
 	for (size_t index = 0; index < Agents.size(); ++index)
 	{
 		auto &Agent = *Agents[index];
 		
-		FColor Color = Neighbors[index].NumNeighbors > 0 ? FColor::Green : FColor::Silver;
-		if (Agent.GetDebugRenderingEnabled())
-			DrawDebugCircle(
-				Agent.GetWorld(),
-				Agent.ToDebugDrawVector(Agent.GetActorLocation()),
-				NeighborhoodRadius,
-				30,
-				Color,
-				false, -1, 0, 0, YVector, ZVector
-			);
+		FColor const Color = Neighbors[index].NumNeighbors > 0 ? FColor::Green : FColor::Silver;
+		
+		Agent.DebugCircleFrom(NeighborhoodRadius, Color);
 	}
 }
 
