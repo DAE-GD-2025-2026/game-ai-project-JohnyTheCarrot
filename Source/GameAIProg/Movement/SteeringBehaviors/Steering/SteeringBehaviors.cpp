@@ -51,7 +51,7 @@ SteeringOutput Pursuit::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	Agent.DebugLineFrom(PredictedTarget, FColor::Green);
 	
 	SteeringOutput Result{};
-	Result.LinearVelocity = PredictedTarget;
+	Result.LinearVelocity = PredictedTarget - Agent.GetPosition();
 	
 	return Result;
 }
