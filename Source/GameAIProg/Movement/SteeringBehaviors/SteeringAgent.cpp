@@ -41,6 +41,7 @@ void ASteeringAgent::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void ASteeringAgent::SetSteeringBehavior(ISteeringBehavior *pNewSteeringBehavior)
 {
+	ResetMaxLinearSpeed();
 	SteeringBehavior = pNewSteeringBehavior;
 }
 

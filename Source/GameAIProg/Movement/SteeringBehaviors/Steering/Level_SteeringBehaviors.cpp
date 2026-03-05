@@ -200,7 +200,7 @@ bool ALevel_SteeringBehaviors::AddAgent(BehaviorTypes BehaviorType, bool AutoOri
 		
 		SetAgentBehavior(ImGuiAgent);
 
-		SteeringAgents.push_back(std::move(ImGuiAgent));
+		SteeringAgents.emplace_back(std::move(ImGuiAgent));
 		
 		RefreshTargetLabels();
 
@@ -221,21 +221,28 @@ void ALevel_SteeringBehaviors::RemoveAgent(unsigned int Index)
 
 void ALevel_SteeringBehaviors::SetAgentBehavior(ImGui_Agent& Agent)
 {
-	Agent.Behavior.reset();
-	
-	// TODO(Tuur): reuse behaviors, no new allocs per agent
 	switch (static_cast<BehaviorTypes>(Agent.SelectedBehavior))
 	{
 	case BehaviorTypes::Seek:
 		Agent.Behavior = std::make_unique<Seek>();
 		break;
+	case BehaviorTypes::Arrive:
+		Agent.Behavior = std::make_unique<Arrive>();
+		break;
 	case BehaviorTypes::Flee:
 		Agent.Behavior = std::make_unique<Flee>();
 		break;
 	default:
+		Agent.Behavior = nullptr;
 		return;
 	} 
 
+	if (Agent.Behavior == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Agent.Behavior was null"));
+		return;
+	}
+	
 	UpdateTarget(Agent);
 	
 	Agent.Agent->SetSteeringBehavior(Agent.Behavior.get());
@@ -255,6 +262,7 @@ void ALevel_SteeringBehaviors::RefreshTargetLabels()
 void ALevel_SteeringBehaviors::UpdateTarget(ImGui_Agent& Agent)
 {
 	// Note: MouseTarget position is updated via Level BP every click
+	ensure(Agent.Behavior);
 	
 	bool const bUseMouseAsTarget = Agent.SelectedTarget < 0;
 	if (!bUseMouseAsTarget)

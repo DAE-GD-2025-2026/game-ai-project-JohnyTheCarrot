@@ -18,6 +18,9 @@ UCLASS()
 class GAMEAIPROG_API ABaseAgent : public ACharacter
 {
 	GENERATED_BODY()
+	
+	UPROPERTY()
+	float OriginalMaxLinearSpeed;
 
 public:
 	// Sets default values for this character's properties
@@ -43,6 +46,9 @@ public:
 	
 	float GetMaxLinearSpeed() const { return GetCharacterMovement()->GetMaxSpeed(); }
 	void SetMaxLinearSpeed(float MaxSpeed) { GetCharacterMovement()->MaxWalkSpeed = MaxSpeed; }
+	void ResetMaxLinearSpeed() { GetCharacterMovement()->MaxWalkSpeed = OriginalMaxLinearSpeed; }
+	
+	float GetOriginalMaxLinearSpeed() const noexcept {return OriginalMaxLinearSpeed;}
 
 	FVector2D GetLinearVelocity() const { return FVector2D{GetCharacterMovement()->Velocity}; }
 	

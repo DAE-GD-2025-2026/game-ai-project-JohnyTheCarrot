@@ -16,6 +16,7 @@ ABaseAgent::ABaseAgent()
 void ABaseAgent::BeginPlay()
 {
 	Super::BeginPlay();
+	OriginalMaxLinearSpeed = GetMaxLinearSpeed();
 }
 
 // Called every frame
