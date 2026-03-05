@@ -69,4 +69,11 @@ public:
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
 };
 
+class Evade : public Pursuit
+{
+	// TODO: ask whether there should be a radius to this.. you can't live a life running for ever
+public:
+	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
+};
+
 // Your own SteeringBehaviors should follow here...

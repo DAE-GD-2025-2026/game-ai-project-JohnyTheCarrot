@@ -89,3 +89,13 @@ SteeringOutput Pursuit::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	
 	return Result;
 }
+
+SteeringOutput Evade::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
+{
+	auto PursuitResult = Pursuit::CalculateSteering(DeltaT, Agent);
+	
+	PursuitResult.LinearVelocity = -PursuitResult.LinearVelocity;
+	
+	Agent.DebugLineRelative(PursuitResult.LinearVelocity, FColor::Yellow);
+	return PursuitResult;
+}
