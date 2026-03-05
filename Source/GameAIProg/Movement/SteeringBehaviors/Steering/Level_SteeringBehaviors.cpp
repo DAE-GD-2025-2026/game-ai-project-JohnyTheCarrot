@@ -19,8 +19,12 @@ void ALevel_SteeringBehaviors::BeginPlay()
 {
 	Super::BeginPlay();
 
-	AddAgent(BehaviorTypes::Seek);
+	AddAgent(BehaviorTypes::Arrive);
+	AddAgent(BehaviorTypes::Pursuit);
+	SteeringAgents[1].SelectedTarget = 0;
+	
 	SteeringAgents[0].Agent->SetDebugRenderingEnabled(true);
+	SteeringAgents[1].Agent->SetDebugRenderingEnabled(true);
 }
 
 void ALevel_SteeringBehaviors::BeginDestroy()
@@ -231,6 +235,12 @@ void ALevel_SteeringBehaviors::SetAgentBehavior(ImGui_Agent& Agent)
 		break;
 	case BehaviorTypes::Flee:
 		Agent.Behavior = std::make_unique<Flee>();
+		break;
+	case BehaviorTypes::Wander:
+		Agent.Behavior = std::make_unique<Wander>();
+		break;
+	case BehaviorTypes::Pursuit:
+		Agent.Behavior = std::make_unique<Pursuit>();
 		break;
 	default:
 		Agent.Behavior = nullptr;
