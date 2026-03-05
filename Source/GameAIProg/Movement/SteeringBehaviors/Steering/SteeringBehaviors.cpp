@@ -20,6 +20,40 @@ SteeringOutput Seek::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	return Result;
 }
 
+SteeringOutput Arrive::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
+{
+	FVector2D ToTargetVector{Target.Position.X - Agent.GetActorLocation().X, Target.Position.Y - Agent.GetActorLocation().Y};
+	auto const DistanceSquared = ToTargetVector.SquaredLength();
+	
+	FColor TargetRadiusCircleColor = FColor::Red;
+	FColor SlowRadiusCircleColor = FColor::White;
+	
+	SteeringOutput Result{};
+	float SpeedFactor = 1.f;
+	if (auto const SlowRadiusSquared = SlowRadius * SlowRadius; DistanceSquared <= SlowRadiusSquared)
+	{
+		SpeedFactor = DistanceSquared / SlowRadiusSquared;
+		SlowRadiusCircleColor = FColor::Cyan;
+		
+		if (DistanceSquared <= TargetRadius * TargetRadius)
+		{
+			Result.IsValid = false;
+			TargetRadiusCircleColor = FColor::Green;
+			ToTargetVector = FVector2D::ZeroVector;
+			SpeedFactor = 1.f;
+		}
+	}
+	
+	Agent.SetMaxLinearSpeed(SpeedFactor * Agent.GetOriginalMaxLinearSpeed());
+	Result.LinearVelocity = ToTargetVector;
+	
+	Agent.DebugCircle(Target.Position, TargetRadius, TargetRadiusCircleColor);
+	Agent.DebugCircle(Target.Position, SlowRadius, SlowRadiusCircleColor);
+	Agent.DebugLineRelative(Result.LinearVelocity, FColor::Yellow);
+	
+	return Result;
+}
+
 SteeringOutput Flee::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
 	auto Seek = Seek::CalculateSteering(DeltaT, Agent);
