@@ -243,15 +243,9 @@ void ALevel_SteeringBehaviors::SetAgentBehavior(ImGui_Agent& Agent)
 		Agent.Behavior = std::make_unique<Pursuit>();
 		break;
 	default:
-		Agent.Behavior = nullptr;
+		UE_LOG(LogTemp, Error, TEXT("Unknown BehaviorType in SetAgentBehavior"));
 		return;
 	} 
-
-	if (Agent.Behavior == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Agent.Behavior was null"));
-		return;
-	}
 	
 	UpdateTarget(Agent);
 	
