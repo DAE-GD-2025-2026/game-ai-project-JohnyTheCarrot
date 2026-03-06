@@ -18,15 +18,10 @@ void ISteeringBehavior::SetTarget(ASteeringAgent const* TargetAgent)
 //*******
 SteeringOutput Seek::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
-	auto const ToTargetVector{[this, &Agent]
-	{
-		UE::Math::TVector2 DeltaPos{Target.Position.X - Agent.GetActorLocation().X, Target.Position.Y - Agent.GetActorLocation().Y};
-		DeltaPos.Normalize();
-		return DeltaPos;
-	}()};
+	FVector2D const ToTargetVector{Target.Position.X - Agent.GetActorLocation().X, Target.Position.Y - Agent.GetActorLocation().Y};
 	
 	SteeringOutput Result{};
-	Result.LinearVelocity = ToTargetVector;
+	Result.LinearVelocity = ToTargetVector.GetSafeNormal();
 	
 	Agent.DebugLineRelative(Result.LinearVelocity, FColor::Yellow);
 	
