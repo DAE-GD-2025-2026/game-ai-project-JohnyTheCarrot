@@ -71,7 +71,8 @@ public:
 
 class Evade : public Pursuit
 {
-	// TODO: ask whether there should be a radius to this.. you can't live a life running for ever
+	float Radius{300.f};
+	
 public:
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
 };

@@ -82,7 +82,7 @@ SteeringOutput Pursuit::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	auto const PredictedTarget = Target.Position + TimeToReachTarget * Target.LinearVelocity;
 	
 	Agent.DebugLine(Target.Position, PredictedTarget, FColor::Cyan);
-	Agent.DebugLineFrom(PredictedTarget, FColor::Green);
+	Agent.DebugLineFrom(PredictedTarget, FColor::Magenta);
 	
 	SteeringOutput Result{};
 	Result.LinearVelocity = PredictedTarget - Agent.GetPosition();
@@ -95,7 +95,13 @@ SteeringOutput Evade::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	auto PursuitResult = Pursuit::CalculateSteering(DeltaT, Agent);
 	
 	PursuitResult.LinearVelocity = -PursuitResult.LinearVelocity;
+	auto const TargetDistSquared = FVector2D::DistSquared(Target.Position, Agent.GetPosition());
+	auto const RadiusSquared = Radius * Radius;
 	
-	Agent.DebugLineRelative(PursuitResult.LinearVelocity, FColor::Yellow);
+	if (TargetDistSquared < RadiusSquared)
+	{
+		PursuitResult.IsValid = false;
+	}
+	
 	return PursuitResult;
 }
