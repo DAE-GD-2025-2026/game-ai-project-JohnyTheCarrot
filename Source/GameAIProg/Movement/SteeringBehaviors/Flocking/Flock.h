@@ -95,7 +95,8 @@ private:
 	{
 		FVector2D AveragePos{};
 		int NumNeighbors{};
-		FVector2D AverageDirection{};
+		FVector2D CumulativeSeparationVec{};
+		float SeparationWeightTotal{};
 		FVector2D AverageVelocity{};
 	};
 	

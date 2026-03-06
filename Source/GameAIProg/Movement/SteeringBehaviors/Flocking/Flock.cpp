@@ -67,7 +67,7 @@ void Flock::Tick(float DeltaTime)
 			Target.Position = Neighbors[index].AveragePos / Neighbors[index].NumNeighbors;
 			pBehaviors->pCohesion->SetTarget(Target);
 		
-			Target.LinearVelocity = Neighbors[index].AverageDirection;
+			Target.LinearVelocity = Neighbors[index].CumulativeSeparationVec / Neighbors[index].SeparationWeightTotal;
 			pBehaviors->pSeparation->SetTarget(Target);
 		
 			Target.LinearVelocity = Neighbors[index].AverageVelocity / Neighbors[index].NumNeighbors;
@@ -193,12 +193,14 @@ void Flock::UpdateNeighborList()
 			if (Distance > NeighborhoodRadius) continue;
 			
 			Neighbors[AgentIndex].AveragePos += (*NeighborAgentIt)->GetPosition();
-			Neighbors[AgentIndex].AverageDirection += ((*AgentIt)->GetPosition() - (*NeighborAgentIt)->GetPosition()) / Distance;
+			Neighbors[AgentIndex].CumulativeSeparationVec += ((*AgentIt)->GetPosition() - (*NeighborAgentIt)->GetPosition()).GetSafeNormal() / Distance;
+			Neighbors[AgentIndex].SeparationWeightTotal += 1.f / Distance;
 			Neighbors[AgentIndex].AverageVelocity += (*NeighborAgentIt)->GetLinearVelocity();
 			++Neighbors[AgentIndex].NumNeighbors;
 			
 			Neighbors[NeighborIndex].AveragePos += (*AgentIt)->GetPosition();
-			Neighbors[NeighborIndex].AverageDirection += ((*NeighborAgentIt)->GetPosition() - (*AgentIt)->GetPosition()) / Distance;
+			Neighbors[NeighborIndex].CumulativeSeparationVec += ((*NeighborAgentIt)->GetPosition() - (*AgentIt)->GetPosition()).GetSafeNormal() / Distance;
+			Neighbors[NeighborIndex].SeparationWeightTotal += 1.f / Distance;
 			Neighbors[NeighborIndex].AverageVelocity += (*AgentIt)->GetLinearVelocity();
 			++Neighbors[NeighborIndex].NumNeighbors;
 		}
