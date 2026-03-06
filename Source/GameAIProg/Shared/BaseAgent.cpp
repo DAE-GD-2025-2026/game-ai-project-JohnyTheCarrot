@@ -77,9 +77,16 @@ void ABaseAgent::DebugCircleFrom(float Radius, FColor Color) const
 	DebugCircle(GetPosition(), Radius, Color);
 }
 
-void ABaseAgent::DebugPoint(FVector2D Point, FColor Color) const
+void ABaseAgent::DebugPoint(FVector2D At, FColor Color) const
 {
 	if (!bIsDebugRenderingEnabled) return;
 	
-	DrawDebugPoint(GetWorld(), ToDebugDrawVector(Point), 10.f, Color);
+	DrawDebugPoint(GetWorld(), ToDebugDrawVector(At), 10.f, Color);
+}
+
+void ABaseAgent::DebugText(FVector2D At, FColor Color, FString const& Text) const
+{
+	if (!bIsDebugRenderingEnabled) return;
+	
+	DrawDebugString(GetWorld(), ToDebugDrawVector(At), Text, nullptr, Color, 0);
 }

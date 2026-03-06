@@ -92,5 +92,7 @@ public:
 	void DebugCircle(FVector2D At, float Radius, FColor Color) const;
 	void DebugCircleFrom(float Radius, FColor Color) const;
 	
-	void DebugPoint(FVector2D Point, FColor Color) const;
+	void DebugPoint(FVector2D At, FColor Color) const;
+	
+	void DebugText(FVector2D At, FColor Color, FString const &Text) const;
 };
