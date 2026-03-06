@@ -52,6 +52,7 @@ private:
 		std::unique_ptr<Separation> pSeparation;
 		std::unique_ptr<Alignment> pAlignment;
 		std::unique_ptr<Wander> pWander{std::make_unique<Wander>()};
+		std::unique_ptr<Seek> pSeek{std::make_unique<Seek>()};
 		std::unique_ptr<BlendedSteering> pBlendedSteering{[this]
 		{
 			using Behavior = BlendedSteering::WeightedBehavior;
@@ -60,6 +61,7 @@ private:
 				Behavior{pSeparation.get(), .8f},
 				Behavior{pAlignment.get(), .7f},
 				Behavior{pWander.get(), .5f},
+				Behavior{pSeek.get(), .5f},
 			});
 		}()};
 		std::unique_ptr<Evade> pEvade{std::make_unique<Evade>()};

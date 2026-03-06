@@ -147,6 +147,10 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 			auto *Weight = pBehaviors->pBlendedSteering->GetWeight(pBehaviors->pWander.get());
 			ImGui::SliderFloat("Wander", Weight, 0.f, SliderMax);
 		}
+		{
+			auto *Weight = pBehaviors->pBlendedSteering->GetWeight(pBehaviors->pSeek.get());
+			ImGui::SliderFloat("Seek", Weight, 0.f, SliderMax);
+		}
 		ImGui::Spacing();
 
   // TODO: implement ImGUI sliders for steering behavior weights here
@@ -203,5 +207,5 @@ void Flock::UpdateNeighborList()
 
 void Flock::SetTarget_Seek(FSteeringParams const& Target)
 {
- // TODO: Implement
+	pBehaviors->pSeek->SetTarget(Target);
 }
