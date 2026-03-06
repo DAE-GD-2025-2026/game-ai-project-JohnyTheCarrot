@@ -100,16 +100,23 @@ SteeringOutput Pursuit::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 
 SteeringOutput Evade::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
-	auto PursuitResult = Pursuit::CalculateSteering(DeltaT, Agent);
-	
-	PursuitResult.LinearVelocity = -PursuitResult.LinearVelocity;
 	auto const TargetDistSquared = FVector2D::DistSquared(Target.Position, Agent.GetPosition());
 	auto const RadiusSquared = Radius * Radius;
 	
-	if (TargetDistSquared < RadiusSquared)
+	Agent.DebugCircle(Target.Position, Radius, FColor::Green);
+	Agent.DebugText(Target.Position, FColor::Green, TEXT("Oh BROTHER this guy STINKS!"));
+	
+	if (TargetDistSquared >= RadiusSquared)
 	{
-		PursuitResult.IsValid = false;
+		SteeringOutput Result{};
+		Result.IsValid = false;
+		
+		return Result;
 	}
+	
+	auto PursuitResult = Pursuit::CalculateSteering(DeltaT, Agent);
+	
+	PursuitResult.LinearVelocity = -PursuitResult.LinearVelocity;
 	
 	return PursuitResult;
 }
