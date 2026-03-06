@@ -25,7 +25,6 @@ Flock::Flock(
 	FVector SpawnPos{-SpawnSize, -SpawnSize, 300.f};
 	for (auto *&Agent : Agents)
 	{
-		// Agent = pWorld->SpawnActor<ASteeringAgent>(AgentClass, ActorSpawnParams);
 		Agent = pWorld->SpawnActor<ASteeringAgent>(
 			AgentClass, SpawnPos, FRotator::ZeroRotator, ActorSpawnParams
 		);
@@ -41,7 +40,7 @@ Flock::Flock(
 		
 		Agent->SetDebugRenderingEnabled(false);
 		
-		Agent->SetSteeringBehavior(pBehaviors->GetBlendedSteering());
+		Agent->SetSteeringBehavior(pBehaviors->GetBehavior());
 	}
 	Agents[0]->SetDebugRenderingEnabled(true);
 }
@@ -58,6 +57,7 @@ void Flock::Tick(float DeltaTime)
 {
     // TODO: trim the agent to the world
 	UpdateNeighborList();
+	pBehaviors->pEvade->SetTarget(pAgentToEvade);
 	
 	for (size_t index = 0; index < Agents.size(); ++index)
 	{
@@ -132,19 +132,19 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 		auto constexpr SliderMax{2.f};
 		ImGui::Text("Behavior Weights");
 		{
-			auto *Weight = pBehaviors->GetBlendedSteering()->GetWeight(pBehaviors->pCohesion.get());
+			auto *Weight = pBehaviors->pBlendedSteering->GetWeight(pBehaviors->pCohesion.get());
 			ImGui::SliderFloat("Cohesion", Weight, 0.f, SliderMax);
 		}
 		{
-			auto *Weight = pBehaviors->GetBlendedSteering()->GetWeight(pBehaviors->pSeparation.get());
+			auto *Weight = pBehaviors->pBlendedSteering->GetWeight(pBehaviors->pSeparation.get());
 			ImGui::SliderFloat("Separation", Weight, 0.f, SliderMax);
 		}
 		{
-			auto *Weight = pBehaviors->GetBlendedSteering()->GetWeight(pBehaviors->pAlignment.get());
+			auto *Weight = pBehaviors->pBlendedSteering->GetWeight(pBehaviors->pAlignment.get());
 			ImGui::SliderFloat("Alignment", Weight, 0.f, SliderMax);
 		}
 		{
-			auto *Weight = pBehaviors->GetBlendedSteering()->GetWeight(pBehaviors->pWander.get());
+			auto *Weight = pBehaviors->pBlendedSteering->GetWeight(pBehaviors->pWander.get());
 			ImGui::SliderFloat("Wander", Weight, 0.f, SliderMax);
 		}
 		ImGui::Spacing();

@@ -27,4 +27,6 @@ protected:
 	
 	UPROPERTY(EditAnywhere, Category = "Flocking")
 	ASteeringAgent* pAgentToEvade{nullptr}; // non owning ref
+	
+	TUniquePtr<Wander> pWander{MakeUnique<Wander>()};
 };

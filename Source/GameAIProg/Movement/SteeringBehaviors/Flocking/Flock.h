@@ -51,30 +51,33 @@ private:
 		std::unique_ptr<Cohesion> pCohesion;
 		std::unique_ptr<Separation> pSeparation;
 		std::unique_ptr<Alignment> pAlignment;
-		std::unique_ptr<Wander> pWander;
-		std::unique_ptr<BlendedSteering> pSteeringBehavior;
+		std::unique_ptr<Wander> pWander{std::make_unique<Wander>()};
+		std::unique_ptr<BlendedSteering> pBlendedSteering{[this]
+		{
+			using Behavior = BlendedSteering::WeightedBehavior;
+			return std::make_unique<BlendedSteering>(BlendedSteering{
+				Behavior{pCohesion.get(), .9f},
+				Behavior{pSeparation.get(), .8f},
+				Behavior{pAlignment.get(), .7f},
+				Behavior{pWander.get(), .5f},
+			});
+		}()};
+		std::unique_ptr<Evade> pEvade{std::make_unique<Evade>()};
+		std::unique_ptr<PrioritySteering> pPrioritySteering{std::make_unique<PrioritySteering>(PrioritySteering{
+			pEvade.get(),
+			pBlendedSteering.get()
+		})};
 		
 		explicit FlockBehavior(Flock const &Flock)
 			: pCohesion{std::make_unique<Cohesion>(Flock)} 
 			, pSeparation{std::make_unique<Separation>(Flock)}
 			, pAlignment{std::make_unique<Alignment>(Flock)}
-			, pWander{std::make_unique<Wander>()}
-			, pSteeringBehavior{[this]
-			{
-				using Behavior = BlendedSteering::WeightedBehavior;
-				return std::make_unique<BlendedSteering>(BlendedSteering{
-					Behavior{pCohesion.get(), .9f},
-					Behavior{pSeparation.get(), .8f},
-					Behavior{pAlignment.get(), .7f},
-					Behavior{pWander.get(), .5f},
-				});
-			}()}
 		{}
 		
 		[[nodiscard]]
-		BlendedSteering *GetBlendedSteering() const noexcept
+		ISteeringBehavior *GetBehavior() const noexcept
 		{
-			return pSteeringBehavior.get();
+			return pPrioritySteering.get();
 		}
 	};
 	
@@ -101,9 +104,6 @@ private:
 	int NrOfNeighbors{0};
 
 	ASteeringAgent* pAgentToEvade{nullptr};
-	
-	std::unique_ptr<BlendedSteering> pBlendedSteering{};
-	std::unique_ptr<PrioritySteering> pPrioritySteering{};
 
 	// UI and rendering
 	bool DebugRenderSteering{false};
