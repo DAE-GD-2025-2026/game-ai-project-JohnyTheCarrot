@@ -1,6 +1,19 @@
 #include "SteeringBehaviors.h"
 #include "GameAIProg/Movement/SteeringBehaviors/SteeringAgent.h"
 
+void ISteeringBehavior::SetTarget(ASteeringAgent const* TargetAgent)
+{
+	check(TargetAgent != nullptr);
+	
+	FTargetData Target;
+	Target.Position = TargetAgent->GetPosition();
+	Target.Orientation = TargetAgent->GetRotation();
+	Target.LinearVelocity = TargetAgent->GetLinearVelocity();
+	Target.AngularVelocity = TargetAgent->GetAngularVelocity();
+	
+	SetTarget(Target);
+}
+
 //SEEK
 //*******
 SteeringOutput Seek::CalculateSteering(float DeltaT, ASteeringAgent& Agent)

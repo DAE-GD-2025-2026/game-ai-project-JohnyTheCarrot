@@ -274,15 +274,9 @@ void ALevel_SteeringBehaviors::UpdateTarget(ImGui_Agent& Agent)
 	bool const bUseMouseAsTarget = Agent.SelectedTarget < 0;
 	if (!bUseMouseAsTarget)
 	{
-		ASteeringAgent* const TargetAgent = SteeringAgents[Agent.SelectedTarget].Agent;
+		ASteeringAgent const* const TargetAgent = SteeringAgents[Agent.SelectedTarget].Agent;
 
-		FTargetData Target;
-		Target.Position = TargetAgent->GetPosition();
-		Target.Orientation = TargetAgent->GetRotation();
-		Target.LinearVelocity = TargetAgent->GetLinearVelocity();
-		Target.AngularVelocity = TargetAgent->GetAngularVelocity();
-
-		Agent.Behavior->SetTarget(Target);
+		Agent.Behavior->SetTarget(TargetAgent);
 	}
 	else
 	{

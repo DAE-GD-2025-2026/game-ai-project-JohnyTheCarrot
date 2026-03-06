@@ -18,6 +18,8 @@ public:
 
 	void SetTarget(const FTargetData& NewTarget) { Target = NewTarget; }
 	
+	void SetTarget(ASteeringAgent const *Agent);
+	
 	template<class T, std::enable_if_t<std::is_base_of_v<ISteeringBehavior, T>>* = nullptr>
 	T* As()
 	{ return static_cast<T*>(this); }
