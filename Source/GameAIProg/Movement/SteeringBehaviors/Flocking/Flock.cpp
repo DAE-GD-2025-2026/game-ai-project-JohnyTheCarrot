@@ -12,6 +12,7 @@ Flock::Flock(
 	bool bTrimWorld)
 	: pWorld{pWorld}
 	, FlockSize{ FlockSize }
+	, GridNeighborAnalysis{pWorld, WorldSize * 2.f, WorldSize * 2.f, 350.f}
 	, pAgentToEvade{pAgentToEvade}
 {
 	Agents.resize(FlockSize);
@@ -31,6 +32,8 @@ Flock::Flock(
 		ensure(Agent != nullptr);
 		
 		Agent->IsDirected = true;
+		Agent->PrimaryActorTick.bCanEverTick = false;
+		
 		SpawnPos.X += Increment;
 		if (SpawnPos.X > SpawnSize)
 		{
@@ -43,6 +46,7 @@ Flock::Flock(
 		Agent->SetSteeringBehavior(pBehaviors->GetBehavior());
 	}
 	Agents[0]->SetDebugRenderingEnabled(true);
+	GetNeighborhoodAnalysisMethod()->Awaken(Agents);
 }
 
 Flock::~Flock()
@@ -56,7 +60,10 @@ Flock::~Flock()
 void Flock::Tick(float DeltaTime)
 {
     // TODO: trim the agent to the world
-	UpdateNeighborList();
+	TRACE_CPUPROFILER_EVENT_SCOPE_STR("Flock Tick");
+	
+	GetNeighborhoodAnalysisMethod()->Analyse(Neighbors, Agents, NeighborhoodRadius);
+	
 	pBehaviors->pEvade->SetTarget(pAgentToEvade);
 	
 	for (size_t index = 0; index < Agents.size(); ++index)
@@ -80,6 +87,9 @@ void Flock::Tick(float DeltaTime)
 
 void Flock::RenderDebug() const
 {
+	GetNeighborhoodAnalysisMethod()->DebugDraw();
+	return;
+	
 	for (size_t index = 0; index < Agents.size(); ++index)
 	{
 		auto &Agent = *Agents[index];
@@ -88,6 +98,7 @@ void Flock::RenderDebug() const
 		
 		Agent.DebugCircleFrom(NeighborhoodRadius, Color);
 	}
+	// GridPartitioning->DebugDraw();
 }
 
 void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
@@ -126,6 +137,13 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 
 		ImGui::Text("Flocking");
 		ImGui::Spacing();
+		
+		std::string_view const ComboLabel{"Partitioning"};
+		std::string_view const ComboOptions{"No partitioning\0Flat partitioning\0"};
+		if (ImGui::Combo(ComboLabel.data(), &NeighborhoodAnalysisMethodIndex, ComboOptions.data()))
+		{
+			GetNeighborhoodAnalysisMethod()->Awaken(Agents);
+		}
 
   // TODO: implement ImGUI checkboxes for debug rendering here
 
@@ -160,6 +178,34 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 #pragma endregion
 }
 
+INeighborAnalysis* Flock::GetNeighborhoodAnalysisMethod() 
+{
+	switch (NeighborhoodAnalysisMethodIndex)
+	{
+	case 0:
+		return &NaiveNeighborAnalysis;
+	case 1:
+		return &GridNeighborAnalysis;
+	default:
+		check(false);
+		return nullptr;
+	}
+}
+
+INeighborAnalysis const* Flock::GetNeighborhoodAnalysisMethod() const
+{
+	switch (NeighborhoodAnalysisMethodIndex)
+	{
+	case 0:
+		return &NaiveNeighborAnalysis;
+	case 1:
+		return &GridNeighborAnalysis;
+	default:
+		check(false);
+		return nullptr;
+	}
+}
+
 void Flock::RenderNeighborhood()
 {
  // TODO: Debugrender the neighbors for the first agent in the flock
@@ -177,7 +223,6 @@ void Flock::UpdateNeighborList()
 	for (auto &Neighbor : Neighbors)
 		Neighbor = {};
 	
-	int Iterations = 0;
 	for (auto AgentIt = Agents.cbegin(); AgentIt != Agents.cend(); ++AgentIt)
 	{
 		if (AgentIt + 1 == Agents.cend()) break;
@@ -189,7 +234,6 @@ void Flock::UpdateNeighborList()
 			auto const NeighborIndex = std::distance(Agents.cbegin(), NeighborAgentIt);
 			
 			auto const Distance = (*AgentIt)->GetHorizontalDistanceTo(*NeighborAgentIt);
-			++Iterations;
 			if (Distance > NeighborhoodRadius) continue;
 			
 			Neighbors[AgentIndex].AveragePos += (*NeighborAgentIt)->GetPosition();

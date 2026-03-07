@@ -9,6 +9,7 @@
 #include "Movement/SteeringBehaviors/CombinedSteering/CombinedSteeringBehaviors.h"
 #include <memory>
 #include "imgui.h"
+#include "INeighborAnalysis.h"
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
 #include "../SpacePartitioning/SpacePartitioning.h"
 #endif
@@ -91,16 +92,19 @@ private:
 	//int NrOfCellsX{ 10 };
 	//TArray<FVector2D> OldPositions{};
 #else // No space partitioning
-	struct FlockAgentNeighborInfo final
-	{
-		FVector2D AveragePos{};
-		int NumNeighbors{};
-		FVector2D CumulativeSeparationVec{};
-		float SeparationWeightTotal{};
-		FVector2D AverageVelocity{};
-	};
+	std::vector<FFlockAgentNeighborInfo> Neighbors{};
 	
-	std::vector<FlockAgentNeighborInfo> Neighbors{};
+	FNaiveNeighborAnalysis NaiveNeighborAnalysis{};
+	FGridNeighborAnalysis GridNeighborAnalysis;
+	
+	int NeighborhoodAnalysisMethodIndex{1};
+	
+	[[nodiscard]]
+	INeighborAnalysis *GetNeighborhoodAnalysisMethod();
+	
+	[[nodiscard]]
+	INeighborAnalysis const *GetNeighborhoodAnalysisMethod() const;
+	
 #endif // USE_SPACE_PARTITIONING
 	
 	float NeighborhoodRadius{200.f};

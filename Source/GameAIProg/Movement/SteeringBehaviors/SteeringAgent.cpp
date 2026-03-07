@@ -26,6 +26,7 @@ void ASteeringAgent::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	PrimaryActorTick.bCanEverTick = !IsDirected;
 	if (!IsDirected && SteeringBehavior)
 	{
 		SteeringOutput const Output = SteeringBehavior->CalculateSteering(DeltaTime, *this);
