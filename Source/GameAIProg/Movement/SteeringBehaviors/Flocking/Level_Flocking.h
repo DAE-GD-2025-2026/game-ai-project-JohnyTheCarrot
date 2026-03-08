@@ -21,7 +21,7 @@ protected:
 
 	bool bUseMouseTarget{true};
 
-	int const FlockSize{1500};
+	int const FlockSize{500};
 
 	TUniquePtr<Flock> pFlock{};
 	
