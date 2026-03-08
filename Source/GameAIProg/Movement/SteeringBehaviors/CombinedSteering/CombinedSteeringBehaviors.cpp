@@ -15,20 +15,13 @@ SteeringOutput BlendedSteering::CalculateSteering(float DeltaT, ASteeringAgent& 
 {
 	SteeringOutput BlendedSteering = {};
 	
-	float WeightsSum = 0;
 	for (const auto [pBehavior, Weight] : WeightedBehaviors)
 	{
 		if (Weight == 0.f) continue;
 		
 		auto const Steering = pBehavior->CalculateSteering(DeltaT, Agent);
-		BlendedSteering.LinearVelocity += Steering.LinearVelocity * Weight;
-		WeightsSum += Weight;
+		BlendedSteering.LinearVelocity += Steering.LinearVelocity.GetSafeNormal() * Weight;
 	}
-	
-	if (WeightsSum == 0.f)
-		return SteeringOutput{};
-	
-	BlendedSteering.LinearVelocity /= WeightsSum;
 	
 	// TODO: Calculate weighted sum for angle, too
 	
