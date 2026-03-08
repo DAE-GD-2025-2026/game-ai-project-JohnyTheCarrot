@@ -73,6 +73,7 @@ private:
 	
 	int FlockSize{0};
 	std::vector<ASteeringAgent*> Agents{};
+	float FlockTickDurationMs{};
 	TUniquePtr<FlockBehavior> pBehaviors{MakeUnique<FlockBehavior>(*this)};
 
 	std::vector<FFlockAgentNeighborInfo> Neighbors{};
@@ -93,7 +94,6 @@ private:
 	ASteeringAgent* pAgentToEvade{nullptr};
 
 	// UI and rendering
-	bool DebugRenderSteering{false};
-	bool DebugRenderNeighborhood{true};
-	bool DebugRenderPartitions{true};
+	bool DebugFirstAgent{false};
+	bool DebugRenderPartitions{false};
 };

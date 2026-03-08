@@ -71,7 +71,7 @@ public:
 	
 	void DebugDraw() const;
 	
-	void Update(std::span<ASteeringAgent const* const> Agents);
+	void Update(std::span<ASteeringAgent const* const> Agents, bool DrawDebug);
 	
 	[[nodiscard]]
 	bool Contains(FVector2D Pos) const;
@@ -86,15 +86,18 @@ public:
 			Agent->DebugCircleFrom(ScanRadius, FColor::Blue);
 		}
 		
-		FRect const Rect{
+		FRect Rect{
 			Agent->GetPosition() - ScanRadius,
 			Agent->GetPosition() + ScanRadius
 		};
-		Agent->DebugLineFrom(Rect.Min, FColor::Blue);
-		Agent->DebugLineFrom(Rect.Max, FColor::Blue);
-		for (auto PosX = Rect.Min.X; PosX <= Rect.Max.X; PosX += m_CellSize)
+		Rect.Min.X = GetRect().Min.X + FMath::FloorToDouble((Rect.Min.X - GetRect().Min.X) / m_CellSize) * m_CellSize;
+		Rect.Min.Y = GetRect().Min.Y + FMath::FloorToDouble((Rect.Min.Y - GetRect().Min.Y) / m_CellSize) * m_CellSize;
+		Rect.Max.X = GetRect().Min.X + FMath::CeilToDouble((Rect.Max.X - GetRect().Min.X) / m_CellSize) * m_CellSize;
+		Rect.Max.Y = GetRect().Min.Y + FMath::CeilToDouble((Rect.Max.Y - GetRect().Min.Y) / m_CellSize) * m_CellSize;
+		
+		for (auto PosX = Rect.Min.X; PosX < Rect.Max.X; PosX += m_CellSize)
 		{
-			for (auto PosY = Rect.Min.Y; PosY <= Rect.Max.Y; PosY += m_CellSize)
+			for (auto PosY = Rect.Min.Y; PosY < Rect.Max.Y; PosY += m_CellSize)
 			{
 				FVector2D const Pos{PosX, PosY};
 				

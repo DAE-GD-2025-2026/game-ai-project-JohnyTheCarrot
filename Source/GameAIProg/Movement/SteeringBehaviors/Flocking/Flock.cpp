@@ -12,7 +12,7 @@ Flock::Flock(
 	bool bTrimWorld)
 	: pWorld{pWorld}
 	, FlockSize{ FlockSize }
-	, GridNeighborAnalysis{pWorld, WorldSize * 2.f, WorldSize * 2.f, 150.f}
+	, GridNeighborAnalysis{pWorld, WorldSize * 2.f, WorldSize * 2.f, 250.f}
 	, pAgentToEvade{pAgentToEvade}
 {
 	Agents.resize(FlockSize);
@@ -45,7 +45,7 @@ Flock::Flock(
 		
 		Agent->SetSteeringBehavior(pBehaviors->GetBehavior());
 	}
-	Agents[0]->SetDebugRenderingEnabled(true);
+	Agents[0]->SetDebugRenderingEnabled(false);
 }
 
 Flock::~Flock()
@@ -58,6 +58,7 @@ Flock::~Flock()
 
 void Flock::Tick(float DeltaTime)
 {
+	auto const StartTime = FDateTime::UtcNow();
     // TODO: trim the agent to the world
 	TRACE_CPUPROFILER_EVENT_SCOPE_STR("Flock Tick");
 	
@@ -82,6 +83,8 @@ void Flock::Tick(float DeltaTime)
 		
 		Agents[index]->PerformSteer(DeltaTime);
 	}
+	
+	FlockTickDurationMs = (FDateTime::UtcNow() - StartTime).GetTotalMilliseconds();
 }
 
 void Flock::RenderDebug() const
@@ -115,8 +118,12 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 
 		ImGui::Text("STATS");
 		ImGui::Indent();
-		ImGui::Text("%.3f ms/frame", 1000.0f / ImGui::GetIO().Framerate);
+		auto const FrameRateMs = 1000.f / ImGui::GetIO().Framerate;
+		ImGui::Text("%.3f ms/frame", FrameRateMs);
 		ImGui::Text("%.1f FPS", ImGui::GetIO().Framerate);
+		ImGui::Text("%d Flock agents", FlockSize);
+		ImGui::Text("%.1f ms/ft (flock tick)", FlockTickDurationMs);
+		ImGui::Text("-> %.1f%% of ms/frame", FlockTickDurationMs / FrameRateMs * 100.f);
 		ImGui::Unindent();
 
 		ImGui::Spacing();
@@ -126,9 +133,16 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 		ImGui::Text("Flocking");
 		ImGui::Spacing();
 		
-		std::string_view const ComboLabel{"Partitioning"};
+		std::string_view const ComboLabel{""};
 		std::string_view const ComboOptions{"No partitioning\0Flat partitioning\0"};
 		ImGui::Combo(ComboLabel.data(), &NeighborhoodAnalysisMethodIndex, ComboOptions.data());
+		
+		ImGui::Text("Debug rendering");
+		if (ImGui::Checkbox("Spatial Partitioning", &DebugRenderPartitions))
+			GetNeighborhoodAnalysisMethod()->SetDrawDebug(DebugRenderPartitions);
+		
+		if (ImGui::Checkbox("First Agent", &DebugFirstAgent))
+			Agents[0]->SetDebugRenderingEnabled(DebugFirstAgent);
 
 		auto constexpr SliderMax{2.f};
 		ImGui::Text("Behavior Weights");

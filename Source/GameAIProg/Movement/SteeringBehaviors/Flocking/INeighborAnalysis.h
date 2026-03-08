@@ -22,10 +22,23 @@ struct FFlockAgentNeighborInfo final
 
 class INeighborAnalysis
 {
+	bool bDrawDebug{false};
+	
 public:
 	virtual void Analyse(std::vector<FFlockAgentNeighborInfo> &Neighbors, std::span<ASteeringAgent *const> Agents, float NeighborhoodRadius) = 0;
 	
 	virtual void DebugDraw() const {}
+	
+	void SetDrawDebug(bool bDrawDebug)
+	{
+		this->bDrawDebug = bDrawDebug;
+	}
+	
+	[[nodiscard]]
+	bool GetShouldDrawDebug() const
+	{
+		return bDrawDebug;
+	}
 	
 	virtual ~INeighborAnalysis() = default;
 };

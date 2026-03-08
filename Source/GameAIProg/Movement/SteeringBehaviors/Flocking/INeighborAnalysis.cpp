@@ -86,14 +86,15 @@ FGridNeighborAnalysis::FGridNeighborAnalysis(UWorld* pWorld, float Width, float 
 
 void FGridNeighborAnalysis::DebugDraw() const
 {
-	GridPartitioning.DebugDraw();
+	if (GetShouldDrawDebug())
+		GridPartitioning.DebugDraw();
 }
 
 void FGridNeighborAnalysis::Analyse(std::vector<FFlockAgentNeighborInfo>& Neighbors,
                                     std::span<ASteeringAgent* const> Agents, float NeighborhoodRadius)
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE_STR("Grid Analyse");
-	GridPartitioning.Update(Agents);
+	GridPartitioning.Update(Agents, GetShouldDrawDebug());
 	
 	int Iterations = 0;
 	

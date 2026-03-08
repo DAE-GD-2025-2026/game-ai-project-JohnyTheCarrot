@@ -75,13 +75,13 @@ public:
 	[[nodiscard]]
 	FVector ToDebugDrawVector(FVector Vec) const
 	{
-		return FVector{Vec.X, Vec.Y, GetActorLocation().Z - 50.f};
+		return FVector{Vec.X, Vec.Y, GetActorLocation().Z};
 	}
 	
 	[[nodiscard]]
 	FVector ToDebugDrawVector(FVector2D Vec) const
 	{
-		return FVector{Vec.X, Vec.Y, GetActorLocation().Z - 50.f};
+		return FVector{Vec.X, Vec.Y, GetActorLocation().Z};
 	}
 	
 	void DebugLine(FVector2D From, FVector2D To, FColor Color) const;

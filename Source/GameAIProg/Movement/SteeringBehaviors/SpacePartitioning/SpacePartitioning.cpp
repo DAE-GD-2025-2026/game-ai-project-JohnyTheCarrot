@@ -20,6 +20,26 @@ FRect const &FGridPartitioning::GetRect() const
 void FGridPartitioning::DebugDraw() const
 {
 	DrawDebugBox(m_pWorld, FVector::ZeroVector, FVector{GetWidth(), GetHeight(), 0.f}, FColor::Cyan);
+	
+	for (float X = m_Rect.Min.X; X < m_Rect.Max.X; X += m_CellSize)
+	{
+		DrawDebugLine(
+			m_pWorld,
+			FVector{X, m_Rect.Min.Y, 0.f},
+			FVector{X, m_Rect.Max.Y, 0.f},
+			FColor::Green
+		);
+	}
+		
+	for (float Y = m_Rect.Min.Y; Y < m_Rect.Max.Y; Y += m_CellSize)
+	{
+		DrawDebugLine(
+			m_pWorld,
+			FVector{m_Rect.Min.X, Y, 0.f},
+			FVector{m_Rect.Max.X, Y, 0.f},
+			FColor::Green
+		);
+	}
 }
 
 void FCell::RemoveAgent(ASteeringAgent const* Agent)
@@ -39,8 +59,9 @@ void FCellInfo::DebugDraw(UWorld *pWorld) const
 	
 	auto const Min3D = FVector{Rect.Min, 0.f};
 	auto const Max3D = FVector{Rect.Max, 0.f};
-	DrawDebugBox(pWorld, Min3D + (Max3D - Min3D) / 2.f, FVector{Width, Height, 0.f}, FColor::Emerald, false, 0);
-	DrawDebugSolidBox(pWorld, Min3D + (Max3D - Min3D) / 2.f, FVector{Width - 20.f, Height - 20.f, 0.f}, FColor::Purple, false, 0);
+	DrawDebugPoint(pWorld, Min3D + (Max3D - Min3D) / 2.f, 10.f, FColor::Purple);
+	DrawDebugBox(pWorld, Min3D + (Max3D - Min3D) / 2.f, FVector{Width / 2.f, Height / 2.f, 0.f}, FColor::Emerald, false, 0);
+	DrawDebugSolidBox(pWorld, Min3D + (Max3D - Min3D) / 2.f, FVector{Width / 2.f - 20.f, Height / 2.f - 20.f, 0.f}, FColor::Purple, false, 0);
 }
 
 bool FCellInfo::Contains(FVector2D Pos) const
@@ -76,7 +97,7 @@ std::optional<FCellInfo> FGridPartitioning::GetCell(FVector2D Pos)
 	};
 }
 
-void FGridPartitioning::Update(std::span<ASteeringAgent const* const> Agents)
+void FGridPartitioning::Update(std::span<ASteeringAgent const* const> Agents, bool DrawDebug)
 {
 	TRACE_CPUPROFILER_EVENT_SCOPE_STR("GridPartitioning Update");
 	{
@@ -96,6 +117,13 @@ void FGridPartitioning::Update(std::span<ASteeringAgent const* const> Agents)
 			if (auto const Cell = this->GetCell(Pos); Cell.has_value())
 			{
 				Cell->pCell->Agents.emplace_back(Agent);
+				if (DrawDebug)
+					DrawDebugLine(
+						m_pWorld,
+						Agent->ToDebugDrawVector(Agent->GetPosition()),
+						Agent->ToDebugDrawVector(Cell->Rect.Min + (Cell->Rect.Max - Cell->Rect.Min) / 2.),
+						FColor::Purple
+					);
 			}
 		}
 	}
@@ -104,6 +132,6 @@ void FGridPartitioning::Update(std::span<ASteeringAgent const* const> Agents)
 bool FGridPartitioning::Contains(FVector2D Pos) const
 {
 	return
-		   (Pos.X >= m_Rect.Min.X && Pos.X <= m_Rect.Max.X)
-		&& (Pos.Y >= m_Rect.Min.Y && Pos.Y <= m_Rect.Max.Y);
+		   (Pos.X >= m_Rect.Min.X && Pos.X < m_Rect.Max.X)
+		&& (Pos.Y >= m_Rect.Min.Y && Pos.Y < m_Rect.Max.Y);
 }
