@@ -18,7 +18,7 @@ SteeringOutput Seek::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	FVector2D const ToTargetVector{Target.Position.X - Agent.GetActorLocation().X, Target.Position.Y - Agent.GetActorLocation().Y};
 	
 	SteeringOutput Result{};
-	Result.LinearVelocity = ToTargetVector.GetSafeNormal();
+	Result.LinearVelocity = ToTargetVector;
 	
 	Agent.DebugLineRelative(Result.LinearVelocity, FColor::Yellow);
 	

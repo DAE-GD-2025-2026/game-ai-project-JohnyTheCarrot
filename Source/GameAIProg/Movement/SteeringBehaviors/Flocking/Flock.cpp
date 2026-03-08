@@ -12,7 +12,7 @@ Flock::Flock(
 	bool bTrimWorld)
 	: pWorld{pWorld}
 	, FlockSize{ FlockSize }
-	, GridNeighborAnalysis{pWorld, WorldSize * 2.f, WorldSize * 2.f, 350.f}
+	, GridNeighborAnalysis{pWorld, WorldSize * 2.f, WorldSize * 2.f, 150.f}
 	, pAgentToEvade{pAgentToEvade}
 {
 	Agents.resize(FlockSize);
@@ -46,7 +46,6 @@ Flock::Flock(
 		Agent->SetSteeringBehavior(pBehaviors->GetBehavior());
 	}
 	Agents[0]->SetDebugRenderingEnabled(true);
-	GetNeighborhoodAnalysisMethod()->Awaken(Agents);
 }
 
 Flock::~Flock()
@@ -88,17 +87,6 @@ void Flock::Tick(float DeltaTime)
 void Flock::RenderDebug() const
 {
 	GetNeighborhoodAnalysisMethod()->DebugDraw();
-	return;
-	
-	for (size_t index = 0; index < Agents.size(); ++index)
-	{
-		auto &Agent = *Agents[index];
-		
-		FColor const Color = Neighbors[index].NumNeighbors > 0 ? FColor::Green : FColor::Silver;
-		
-		Agent.DebugCircleFrom(NeighborhoodRadius, Color);
-	}
-	// GridPartitioning->DebugDraw();
 }
 
 void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
@@ -140,12 +128,7 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 		
 		std::string_view const ComboLabel{"Partitioning"};
 		std::string_view const ComboOptions{"No partitioning\0Flat partitioning\0"};
-		if (ImGui::Combo(ComboLabel.data(), &NeighborhoodAnalysisMethodIndex, ComboOptions.data()))
-		{
-			GetNeighborhoodAnalysisMethod()->Awaken(Agents);
-		}
-
-  // TODO: implement ImGUI checkboxes for debug rendering here
+		ImGui::Combo(ComboLabel.data(), &NeighborhoodAnalysisMethodIndex, ComboOptions.data());
 
 		auto constexpr SliderMax{2.f};
 		ImGui::Text("Behavior Weights");

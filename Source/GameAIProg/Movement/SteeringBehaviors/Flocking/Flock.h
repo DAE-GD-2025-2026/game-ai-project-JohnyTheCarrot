@@ -10,9 +10,6 @@
 #include <memory>
 #include "imgui.h"
 #include "INeighborAnalysis.h"
-#ifdef GAMEAI_USE_SPACE_PARTITIONING
-#include "../SpacePartitioning/SpacePartitioning.h"
-#endif
 #include "Movement/SteeringBehaviors/Flocking/FlockingSteeringBehaviors.h"
 
 class Flock final
@@ -87,11 +84,7 @@ private:
 	int FlockSize{0};
 	std::vector<ASteeringAgent*> Agents{};
 	TUniquePtr<FlockBehavior> pBehaviors{MakeUnique<FlockBehavior>(*this)};
-#ifdef GAMEAI_USE_SPACE_PARTITIONING
-	//std::unique_ptr<CellSpace> pPartitionedSpace{};
-	//int NrOfCellsX{ 10 };
-	//TArray<FVector2D> OldPositions{};
-#else // No space partitioning
+
 	std::vector<FFlockAgentNeighborInfo> Neighbors{};
 	
 	FNaiveNeighborAnalysis NaiveNeighborAnalysis{};
@@ -104,8 +97,6 @@ private:
 	
 	[[nodiscard]]
 	INeighborAnalysis const *GetNeighborhoodAnalysisMethod() const;
-	
-#endif // USE_SPACE_PARTITIONING
 	
 	float NeighborhoodRadius{200.f};
 	int NrOfNeighbors{0};

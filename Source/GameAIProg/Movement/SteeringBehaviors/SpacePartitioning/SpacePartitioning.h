@@ -15,68 +15,11 @@
 #include "Debug/ReporterGraph.h"
 #include "Movement/SteeringBehaviors/SteeringAgent.h"
 
-// --- Cell ---
-// ------------
-// struct Cell final
-// {
-// 	Cell(float Left, float Bottom, float Width, float Height);
-//
-// 	std::vector<FVector2D> GetRectPoints() const;
-// 	
-// 	// all the agents currently in this cell
-// 	std::list<ASteeringAgent*> Agents;
-// 	FRect BoundingBox;
-// };
-//
-// // --- Partitioned Space ---
-// // -------------------------
-// class CellSpace final
-// {
-// public:
-// 	CellSpace(UWorld* pWorld, float Width, float Height, int Rows, int Cols, int MaxEntities);
-//
-// 	void AddAgent(ASteeringAgent& Agent);
-// 	void UpdateAgentCell(ASteeringAgent& Agent, const FVector2D& OldPos);
-//
-// 	void RegisterNeighbors(ASteeringAgent& Agent, float QueryRadius);
-// 	const TArray<ASteeringAgent*>& GetNeighbors() const { return Neighbors; }
-// 	int GetNrOfNeighbors() const { return NrOfNeighbors; }
-//
-// 	//empties the cells of entities
-// 	void EmptyCells();
-// 	void RenderCells()const;
-//
-// private:
-// 	// For debug draw purposes
-// 	UWorld* pWorld{};
-// 	
-// 	// Cells and properties
-// 	std::vector<Cell> Cells;
-// 	FVector2D CellOrigin{};
-// 	
-// 	float SpaceWidth;
-// 	float SpaceHeight;
-//
-// 	int NrOfRows;
-// 	int NrOfCols;
-//
-// 	float CellWidth;
-// 	float CellHeight;
-//
-// 	// Members to avoid memory allocation on every frame
-// 	TArray<ASteeringAgent*> Neighbors;
-// 	int NrOfNeighbors;
-//
-// 	// Helper functions
-// 	int PositionToIndex(FVector2D const & Pos) const;
-// 	bool DoRectsOverlap(FRect const& RectA, FRect const& RectB);
-// };
-
-struct Cell final
+struct FCell final
 {
 	std::vector<ASteeringAgent const*> Agents{};
 	
-	Cell()
+	FCell()
 	{
 		Agents.reserve(5);
 	}
@@ -84,25 +27,27 @@ struct Cell final
 	void RemoveAgent(ASteeringAgent const *Agent);
 };
 
+struct FCellInfo
+{
+	FCell* pCell;
+	FRect Rect;
+	size_t CellIndex;
+		
+	void DebugDraw(UWorld *pWorld) const;
+		
+	[[nodiscard]]
+	bool Contains(FVector2D Pos) const;
+};
+
 class FGridPartitioning final
 {
-	std::vector<Cell> Cells;
-	std::vector<Cell*> PreviousAgentCell;
-	FRect Rect;
-	UWorld* pWorld;
-	float CellSize;
-	
-	struct FCellInfo
-	{
-		Cell* pCell;
-		FRect Rect;
-		
-		void DebugDraw(UWorld *pWorld) const;
-		
-		[[nodiscard]]
-		bool Contains(FVector2D Pos) const;
-	};
-	
+	std::vector<FCell> Cells;
+	std::vector<FCell*> PreviousAgentCell;
+	FRect m_Rect;
+	UWorld* m_pWorld;
+	int m_CellsPerRow;
+	float m_CellSize;
+
 public:
 	FGridPartitioning(UWorld* pWorld, float Width, float Height, float CellSize);
 	
@@ -115,28 +60,55 @@ public:
 	[[nodiscard]]
 	float GetWidth() const
 	{
-		return Rect.Max.X - Rect.Min.X;
+		return m_Rect.Max.X - m_Rect.Min.X;
 	}
 	
 	[[nodiscard]]
 	float GetHeight() const
 	{
-		return Rect.Max.Y - Rect.Min.Y;
+		return m_Rect.Max.Y - m_Rect.Min.Y;
 	}
 	
 	void DebugDraw() const;
 	
 	void Update(std::span<ASteeringAgent const* const> Agents);
 	
-	void MapNeighborsOf(ASteeringAgent const *Agent, std::invocable<ASteeringAgent const*> auto MapFn)
+	[[nodiscard]]
+	bool Contains(FVector2D Pos) const;
+	
+	void MapNeighborsOf(ASteeringAgent const *Agent, float ScanRadius, std::invocable<ASteeringAgent const*> auto MapFn)
 	{
-		auto const Cell = this->GetCell(Agent->GetPosition());
-		if (!Cell.has_value()) return;
+		if (!Contains(Agent->GetPosition())) return;
 		
-		for (ASteeringAgent const* SteeringAgent : Cell->pCell->Agents)
+		if (Agent->GetDebugRenderingEnabled())
 		{
-			if (SteeringAgent == Agent) continue;
-			MapFn(SteeringAgent);
+			DrawDebugBox(m_pWorld, Agent->ToDebugDrawVector(Agent->GetPosition()), FVector{ScanRadius, ScanRadius, 0.f}, FColor::Blue, false, 0);
+			Agent->DebugCircleFrom(ScanRadius, FColor::Blue);
+		}
+		
+		FRect const Rect{
+			Agent->GetPosition() - ScanRadius,
+			Agent->GetPosition() + ScanRadius
+		};
+		Agent->DebugLineFrom(Rect.Min, FColor::Blue);
+		Agent->DebugLineFrom(Rect.Max, FColor::Blue);
+		for (auto PosX = Rect.Min.X; PosX <= Rect.Max.X; PosX += m_CellSize)
+		{
+			for (auto PosY = Rect.Min.Y; PosY <= Rect.Max.Y; PosY += m_CellSize)
+			{
+				FVector2D const Pos{PosX, PosY};
+				
+				auto const Cell = GetCell(Pos);
+				if (!Cell.has_value()) continue;
+				if (Agent->GetDebugRenderingEnabled())
+					Cell->DebugDraw(m_pWorld);
+				
+				for (ASteeringAgent const* NeighborAgent : Cell->pCell->Agents)
+				{
+					if (NeighborAgent  == Agent) continue;
+					MapFn(NeighborAgent);
+				}
+			}
 		}
 	}
 };

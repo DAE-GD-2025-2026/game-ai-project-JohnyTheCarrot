@@ -23,9 +23,6 @@ struct FFlockAgentNeighborInfo final
 class INeighborAnalysis
 {
 public:
-	// We are switching to this implementation, we want to make sure its state is accurate
-	virtual void Awaken(std::span<ASteeringAgent* const> Agents) {}
-	
 	virtual void Analyse(std::vector<FFlockAgentNeighborInfo> &Neighbors, std::span<ASteeringAgent *const> Agents, float NeighborhoodRadius) = 0;
 	
 	virtual void DebugDraw() const {}
@@ -49,8 +46,6 @@ public:
 	FGridNeighborAnalysis(UWorld* pWorld, float Width, float Height, float CellSize);
 	
 	virtual void DebugDraw() const override;
-	
-	virtual void Awaken(std::span<ASteeringAgent* const> Agents) override;
 	
 	virtual void Analyse(std::vector<FFlockAgentNeighborInfo>& Neighbors, std::span<ASteeringAgent* const> Agents, float NeighborhoodRadius) override;;
 };

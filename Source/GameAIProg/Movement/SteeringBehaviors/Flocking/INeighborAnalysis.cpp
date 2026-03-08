@@ -89,12 +89,6 @@ void FGridNeighborAnalysis::DebugDraw() const
 	GridPartitioning.DebugDraw();
 }
 
-void FGridNeighborAnalysis::Awaken(std::span<ASteeringAgent* const> Agents)
-{
-	// We haven't been able to change the cells because we weren't responsible for the analysis.
-	// If we're awakened, we want to properly set up the cells again.
-}
-
 void FGridNeighborAnalysis::Analyse(std::vector<FFlockAgentNeighborInfo>& Neighbors,
                                     std::span<ASteeringAgent* const> Agents, float NeighborhoodRadius)
 {
@@ -115,11 +109,13 @@ void FGridNeighborAnalysis::Analyse(std::vector<FFlockAgentNeighborInfo>& Neighb
 		if (!Cell.has_value()) 
 			continue;
 		
-		GridPartitioning.MapNeighborsOf(*AgentIt, [&Iterations, NeighborhoodRadius, AgentIt, &Neighbor](ASteeringAgent const* NeighborAgent)
+		GridPartitioning.MapNeighborsOf(*AgentIt, NeighborhoodRadius, [&Iterations, NeighborhoodRadius, AgentIt, &Neighbor](ASteeringAgent const* NeighborAgent)
 		{
 			auto const DiffVec = (*AgentIt)->GetPosition() - NeighborAgent->GetPosition();
 			auto const DistSquared = DiffVec.SquaredLength();
 			if (DistSquared > NeighborhoodRadius * NeighborhoodRadius) return;
+			
+			(*AgentIt)->DebugPoint(NeighborAgent->GetPosition(), FColor::Blue);
 			
 			auto const InvDistance = FMath::InvSqrt(DistSquared);
 			Neighbor.AveragePos += NeighborAgent->GetPosition();
