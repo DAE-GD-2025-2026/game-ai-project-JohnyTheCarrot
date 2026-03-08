@@ -29,16 +29,6 @@ public:
 	void RenderDebug() const;
 	void ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize);
 
-#ifdef GAMEAI_USE_SPACE_PARTITIONING
-	//const TArray<ASteeringAgent*>& GetNeighbors() const { return pPartitionedSpace->GetNeighbors(); }
-	//int GetNrOfNeighbors() const { return pPartitionedSpace->GetNrOfNeighbors(); }
-#else // No space partitioning
-	void RegisterNeighbors(ASteeringAgent* const Agent);
-	int GetNrOfNeighbors() const { return NrOfNeighbors; }
-#endif // USE_SPACE_PARTITIONING
-
-	void UpdateNeighborList();
-
 	void SetTarget_Seek(FSteeringParams const & Target);
 
 private:
@@ -99,7 +89,6 @@ private:
 	INeighborAnalysis const *GetNeighborhoodAnalysisMethod() const;
 	
 	float NeighborhoodRadius{200.f};
-	int NrOfNeighbors{0};
 
 	ASteeringAgent* pAgentToEvade{nullptr};
 
@@ -107,6 +96,4 @@ private:
 	bool DebugRenderSteering{false};
 	bool DebugRenderNeighborhood{true};
 	bool DebugRenderPartitions{true};
-
-	void RenderNeighborhood();
 };

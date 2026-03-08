@@ -189,51 +189,6 @@ INeighborAnalysis const* Flock::GetNeighborhoodAnalysisMethod() const
 	}
 }
 
-void Flock::RenderNeighborhood()
-{
- // TODO: Debugrender the neighbors for the first agent in the flock
-}
-
-#ifndef GAMEAI_USE_SPACE_PARTITIONING
-void Flock::RegisterNeighbors(ASteeringAgent* const pAgent)
-{
- // TODO: Implement
-}
-#endif
-
-void Flock::UpdateNeighborList()
-{
-	for (auto &Neighbor : Neighbors)
-		Neighbor = {};
-	
-	for (auto AgentIt = Agents.cbegin(); AgentIt != Agents.cend(); ++AgentIt)
-	{
-		if (AgentIt + 1 == Agents.cend()) break;
-		
-		auto const AgentIndex = std::distance(Agents.cbegin(), AgentIt);
-		
-		for (auto NeighborAgentIt = AgentIt + 1; NeighborAgentIt != Agents.end(); ++NeighborAgentIt)
-		{
-			auto const NeighborIndex = std::distance(Agents.cbegin(), NeighborAgentIt);
-			
-			auto const Distance = (*AgentIt)->GetHorizontalDistanceTo(*NeighborAgentIt);
-			if (Distance > NeighborhoodRadius) continue;
-			
-			Neighbors[AgentIndex].AveragePos += (*NeighborAgentIt)->GetPosition();
-			Neighbors[AgentIndex].CumulativeSeparationVec += ((*AgentIt)->GetPosition() - (*NeighborAgentIt)->GetPosition()).GetSafeNormal() / Distance;
-			Neighbors[AgentIndex].SeparationWeightTotal += 1.f / Distance;
-			Neighbors[AgentIndex].AverageVelocity += (*NeighborAgentIt)->GetLinearVelocity();
-			++Neighbors[AgentIndex].NumNeighbors;
-			
-			Neighbors[NeighborIndex].AveragePos += (*AgentIt)->GetPosition();
-			Neighbors[NeighborIndex].CumulativeSeparationVec += ((*NeighborAgentIt)->GetPosition() - (*AgentIt)->GetPosition()).GetSafeNormal() / Distance;
-			Neighbors[NeighborIndex].SeparationWeightTotal += 1.f / Distance;
-			Neighbors[NeighborIndex].AverageVelocity += (*AgentIt)->GetLinearVelocity();
-			++Neighbors[NeighborIndex].NumNeighbors;
-		}
-	}
-}
-
 void Flock::SetTarget_Seek(FSteeringParams const& Target)
 {
 	pBehaviors->pSeek->SetTarget(Target);
