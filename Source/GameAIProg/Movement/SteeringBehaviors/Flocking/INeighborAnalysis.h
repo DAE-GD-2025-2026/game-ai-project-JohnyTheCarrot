@@ -29,9 +29,9 @@ public:
 	
 	virtual void DebugDraw() const {}
 	
-	void SetDrawDebug(bool bDrawDebug)
+	void SetDrawDebug(bool DrawDebug)
 	{
-		this->bDrawDebug = bDrawDebug;
+		bDrawDebug = DrawDebug;
 	}
 	
 	[[nodiscard]]

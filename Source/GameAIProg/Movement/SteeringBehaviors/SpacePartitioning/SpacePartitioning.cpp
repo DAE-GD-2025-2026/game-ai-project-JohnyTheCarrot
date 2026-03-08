@@ -93,7 +93,7 @@ std::optional<FCellInfo> FGridPartitioning::GetCell(FVector2D Pos)
 	return FCellInfo{
 		&Cells[CellIndex],
 		CellRect,
-		CellIndex
+		size_t(CellIndex)
 	};
 }
 
