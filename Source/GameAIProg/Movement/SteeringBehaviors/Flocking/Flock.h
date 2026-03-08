@@ -55,11 +55,11 @@ private:
 		{
 			using Behavior = BlendedSteering::WeightedBehavior;
 			return std::make_unique<BlendedSteering>(BlendedSteering{
-				Behavior{pCohesion.get(), .9f},
-				Behavior{pSeparation.get(), .8f},
-				Behavior{pAlignment.get(), .7f},
-				Behavior{pWander.get(), .5f},
-				Behavior{pSeek.get(), .5f},
+				Behavior{pCohesion.get(), .383f},
+				Behavior{pSeparation.get(), .558f},
+				Behavior{pAlignment.get(), .823f},
+				Behavior{pWander.get(), .397f},
+				Behavior{pSeek.get(), .133f},
 			});
 		}()};
 		std::unique_ptr<Evade> pEvade{std::make_unique<Evade>()};
