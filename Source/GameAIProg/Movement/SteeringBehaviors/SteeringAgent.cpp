@@ -54,3 +54,9 @@ void ASteeringAgent::PerformSteer(float DeltaTime)
 	SteeringOutput const Output = SteeringBehavior->CalculateSteering(DeltaTime, *this);
 	AddMovementInput(FVector{Output.LinearVelocity, 0.f});
 }
+
+float ASteeringAgent::GetCapsuleRadius() const noexcept
+{
+	// TODO: unstub
+	return 50.f;
+}

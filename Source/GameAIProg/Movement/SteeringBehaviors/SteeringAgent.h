@@ -77,4 +77,7 @@ public:
 	void SetSteeringBehavior(ISteeringBehavior *pNewSteeringBehavior);
 	
 	void PerformSteer(float DeltaTime);
+	
+	[[nodiscard]]
+	float GetCapsuleRadius() const noexcept;
 };

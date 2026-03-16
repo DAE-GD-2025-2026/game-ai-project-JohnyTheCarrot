@@ -45,6 +45,8 @@ public:
 	Arrive() = default;
 	
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent& Agent) override;
+	
+	void SetTargetRadius(float Radius) { TargetRadius = Radius; }
 };
 
 class Flee : public Seek

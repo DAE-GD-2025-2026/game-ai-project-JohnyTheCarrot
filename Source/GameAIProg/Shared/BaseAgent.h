@@ -44,6 +44,11 @@ public:
 	FVector2D GetForward() const { return FVector2D{GetActorForwardVector().X, GetActorForwardVector().Y}; }
 	float GetRotation() const { return GetActorRotation().Yaw; }
 	
+	void SetPosition(FVector2D Pos)
+	{
+		SetActorLocation(FVector{Pos, GetActorLocation().Z});
+	}
+	
 	float GetMaxLinearSpeed() const { return GetCharacterMovement()->GetMaxSpeed(); }
 	void SetMaxLinearSpeed(float MaxSpeed) { GetCharacterMovement()->MaxWalkSpeed = MaxSpeed; }
 	void ResetMaxLinearSpeed() { GetCharacterMovement()->MaxWalkSpeed = OriginalMaxLinearSpeed; }
