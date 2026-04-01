@@ -85,22 +85,22 @@ FIntVector2 GridGraph::GetColAndRow(int Index) const
 	return { Index % NrColumns, Index / NrRows }; // Col, Row
 }
 
-std::unique_ptr<Node> const& GridGraph::GetNode(int Row, int Col) const
+Node const* GridGraph::GetNode(int Row, int Col) const
 {
 	return Graph::GetNode(GetNodeId(Col, Row));
 }
 
-std::unique_ptr<Node>& GridGraph::GetNode(int Row, int Col)
+Node* GridGraph::GetNode(int Row, int Col)
 {
 	return Graph::GetNode(GetNodeId(Col, Row));
 }
 
-std::unique_ptr<Node> const& GridGraph::GetNodeAtPosition(FVector2D const& Position) const
+Node const* GridGraph::GetNodeAtPosition(FVector2D const& Position) const
 {
 	return Graph::GetNode(GetNodeIdAtPosition(Position));
 }
 
-std::unique_ptr<Node>& GridGraph::GetNodeAtPosition(FVector2D const& Position)
+Node* GridGraph::GetNodeAtPosition(FVector2D const& Position)
 {
 	return Graph::GetNode(GetNodeIdAtPosition(Position));
 }

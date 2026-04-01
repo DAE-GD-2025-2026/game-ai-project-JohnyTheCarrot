@@ -93,8 +93,8 @@ namespace GameAI
         std::vector<Node*> GetActiveNodes();
         int GetNodeCount() const;
 
-        std::unique_ptr<Node> const& GetNode(int NodeId) const;
-        std::unique_ptr<Node>& GetNode(int NodeId);
+        Node const* GetNode(int NodeId) const;
+        Node* GetNode(int NodeId);
         
         template<typename T>
         T const * GetNodeAs(int NodeId) const
@@ -114,10 +114,13 @@ namespace GameAI
         std::vector<std::unique_ptr<Connection>> const& GetConnections() const;
         std::vector<std::unique_ptr<Connection>>& GetConnections();
 
-        Connection* FindConnection(int FromId, int ToId);         
+        Connection* FindConnection(int FromId, int ToId);
         std::vector<Connection*> FindConnectionsFrom(int NodeId) const;           
         std::vector<Connection*> FindConnectionsTo(int NodeId) const;
         std::vector<Connection*> FindConnectionsWith(int NodeId) const;
+        
+        [[nodiscard]]
+        int GetDegree(int NodeId) const;
 
         void AddConnection(std::unique_ptr<Connection> NewConnection);
         void AddConnection(int FromNodeId, int ToNodeId);

@@ -21,6 +21,7 @@ SteeringOutput Seek::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	Result.LinearVelocity = ToTargetVector;
 	
 	Agent.DebugLineRelative(Result.LinearVelocity, FColor::Yellow);
+	Agent.SetMaxLinearSpeed(Agent.GetOriginalMaxLinearSpeed());
 	
 	return Result;
 }

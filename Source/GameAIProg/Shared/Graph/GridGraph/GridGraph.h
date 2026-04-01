@@ -38,11 +38,11 @@ namespace GameAI
 		FVector2D GetNodePosition(int Index) const;
 		FIntVector2 GetColAndRow(int Index) const;
 		
-		std::unique_ptr<Node> const & GetNode(int Row, int Col) const;
-		std::unique_ptr<Node>& GetNode(int Row, int Col);
+		Node const * GetNode(int Row, int Col) const;
+		Node* GetNode(int Row, int Col);
 		
-		std::unique_ptr<Node> const & GetNodeAtPosition(FVector2D const & Position) const;
-		std::unique_ptr<Node> & GetNodeAtPosition(FVector2D const & Position);
+		Node const * GetNodeAtPosition(FVector2D const & Position) const;
+		Node * GetNodeAtPosition(FVector2D const & Position);
 		
 		void AddConnectionsToAdjacentCells(int NodeId);
 		

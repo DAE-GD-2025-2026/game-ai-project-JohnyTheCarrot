@@ -83,7 +83,10 @@ namespace GameAI
 
     Connection Connection::GetInverseCopy() const
     {
-        return Connection{ToId, FromId};
+        Connection Conn{ToId, FromId};
+        Conn.SetWeight(Weight);
+        
+        return Conn;
     }
 
     bool Connection::operator==(const Connection& Other) const
@@ -157,14 +160,14 @@ namespace GameAI
             [](auto const& Element) { return Element->GetId() >= 0; });
     }
 
-    std::unique_ptr<Node> const& Graph::GetNode(int NodeId) const
+    Node const* Graph::GetNode(int NodeId) const
     {
-        return Nodes[NodeId];
+        return Nodes[NodeId].get();
     }
 
-    std::unique_ptr<Node>& Graph::GetNode(int NodeId)
+    Node* Graph::GetNode(int NodeId)
     {
-        return Nodes[NodeId];
+        return Nodes[NodeId].get();
     }
 
     int Graph::AddNode(std::unique_ptr<Node> NewNode)
@@ -256,6 +259,19 @@ namespace GameAI
         std::ranges::move(FromConnections, std::back_inserter(Result));
         std::ranges::move(ToConnections, std::back_inserter(Result));
         return Result;
+    }
+
+    int Graph::GetDegree(int NodeId) const
+    {
+        int Degree = 0;
+        
+        for (auto& Connection : Connections)
+        {
+            if (Connection->GetFromId() == NodeId)
+                ++Degree;
+        }
+        
+        return Degree;
     }
 
     void Graph::AddConnection(std::unique_ptr<Connection> NewConnection)
