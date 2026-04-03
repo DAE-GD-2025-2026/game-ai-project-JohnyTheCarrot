@@ -15,7 +15,7 @@ GameAI::NavGraph::NavGraph(const NavGraph& Other)
 	Nodes.reserve(Other.Nodes.size());
 	for (std::unique_ptr<Node> const & OtherNode : Other.Nodes)
 	{
-		Nodes.push_back(std::make_unique<NavGraphNode>(*dynamic_cast<NavGraphNode*>(OtherNode.get())));
+		Nodes.push_back(std::make_unique<NavGraphNode>(*static_cast<NavGraphNode*>(OtherNode.get())));
 	}
         
 	Connections.reserve(Other.Connections.size());
