@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include <vector>
 
-
 class TriPolygon
 {
 public:
@@ -25,6 +24,7 @@ public:
 	struct Triangle
 	{
 		std::array<int, 3> VertexIndices;
+		mutable std::vector<int> MidPointNodeIds{};
 		
 		FVector GetVertex0(TriPolygon const& Poly) const { return Poly.Vertices[VertexIndices[0]]; }
 		FVector GetVertex1(TriPolygon const& Poly) const { return Poly.Vertices[VertexIndices[1]]; }
@@ -88,6 +88,7 @@ struct std::hash<TriPolygon::Edge>
 template<>
 struct std::hash<TriPolygon::Triangle>
 {
+	// deliberately doesn't take the node pointers into account, as they don't define a triangle for our purposes, they're just metadata
 	std::size_t operator()(const TriPolygon::Triangle& Tri) const
 	{
 		// Sort so {A,B,C} in any order hashes the same

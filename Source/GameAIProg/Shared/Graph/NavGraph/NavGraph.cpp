@@ -76,6 +76,7 @@ void GameAI::NavGraph::CreateNavigationGraph()
 			auto const FirstTri = It->second;
 			TriNodes.emplace(Tri, NodeId);
 			TriNodes.emplace(FirstTri, NodeId);
+			Tri.MidPointNodeIds.emplace_back(NodeId);
 		}
 		else
 		{
@@ -85,7 +86,7 @@ void GameAI::NavGraph::CreateNavigationGraph()
 #pragma endregion
 	
 	// Step 1: we go over all the triangles and take note of any edges we see more than once, as described above
-	auto const Triangles = pNavPoly->GetTriangles();
+	auto const &Triangles = pNavPoly->GetTriangles();
 	UE_LOG(LogTemp, Log, TEXT("triangles %d"), Triangles.size());
 	for (auto const &Triangle : Triangles)
 	{
@@ -113,10 +114,11 @@ void GameAI::NavGraph::CreateNavigationGraph()
 				auto const NodeId = It->second;
 				
 				if (NodeId == OtherNodeId) continue;
-				AddConnection(NodeId, OtherNodeId, GetDistanceBetween(NodeId, OtherNodeId));
+				AddConnection(NodeId, OtherNodeId);
 			}
 		}
 	}
+	SetConnectionCostsToDistances();
 	
 	UE_LOG(LogTemp, Log, TEXT("hi %d"), GetNodeCount());
 }

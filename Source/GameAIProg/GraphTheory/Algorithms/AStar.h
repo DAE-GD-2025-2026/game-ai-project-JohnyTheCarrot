@@ -11,7 +11,13 @@ namespace GameAI
 	public:
 		AStar(Graph* const pGraph, HeuristicFunctions::Heuristic hFunction);
 		
+		[[nodiscard]]
 		std::vector<Node*> FindPath(Node* const pStartNode, Node* const pDestinationNode);
+		[[nodiscard]]
+		std::vector<Node*> FindPath(int StartNodeId, int EndNodeId)
+		{
+			return FindPath(pGraph->GetNode(StartNodeId), pGraph->GetNode(EndNodeId));
+		}
 
 	private:
 		float GetHeuristicCost(Node* const pStartNode, Node* const pEndNode) const;

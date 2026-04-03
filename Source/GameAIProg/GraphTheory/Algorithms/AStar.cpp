@@ -103,7 +103,7 @@ std::vector<Node*> AStar::FindPath(Node* const pStartNode, Node* const pGoalNode
 		}
 	}
 	
-	checkNoEntry();
+	UE_LOG(LogTemp, Error, TEXT("No path"));
 	return {};
 }
 
