@@ -61,7 +61,7 @@ namespace GameAI
     class Connection
     {
     public:
-        Connection(int FromId, int ToId);
+        Connection(int FromId, int ToId, float Weight = 0.f);
         virtual ~Connection() = default;
 
         int GetFromId() const;
@@ -123,7 +123,10 @@ namespace GameAI
         int GetDegree(int NodeId) const;
 
         void AddConnection(std::unique_ptr<Connection> NewConnection);
-        void AddConnection(int FromNodeId, int ToNodeId);
+        void AddConnection(int FromNodeId, int ToNodeId, float Weight = 0.f);
+        
+        [[nodiscard]]
+        float GetDistanceBetween(int FromNodeId, int ToNodeId) const;
 
         bool RemoveConnection(Connection const* ConnectionToRemove);
         bool RemoveConnection(int FromNodeId, int ToNodeId);

@@ -45,7 +45,6 @@ std::vector<Node*> AStar::FindPath(Node* const pStartNode, Node* const pGoalNode
 			.estimatedTotalCost = GetHeuristicCost(pStartNode, pGoalNode),
 		}
 	);
-	UE_LOG(LogTemp, Log, TEXT("hi"));
 	std::unordered_map<Node*, Node*> CameFrom;
 	
 	while (!openSet.empty())

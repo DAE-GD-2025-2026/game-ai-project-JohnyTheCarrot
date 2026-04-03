@@ -55,9 +55,10 @@ namespace GameAI
 #pragma endregion Nodes
 
 #pragma region Connections
-    Connection::Connection(int FromId, int ToId)
+    Connection::Connection(int FromId, int ToId, float Weight)
         : FromId(FromId)
         , ToId(ToId)
+        , Weight(Weight)
     {
     }
 
@@ -303,9 +304,20 @@ namespace GameAI
         }
     }
 
-    void Graph::AddConnection(int FromNodeId, int ToNodeId)
+    void Graph::AddConnection(int FromNodeId, int ToNodeId, float Weight)
     {
-        AddConnection(std::make_unique<Connection>(FromNodeId, ToNodeId));
+        AddConnection(std::make_unique<Connection>(FromNodeId, ToNodeId, Weight));
+    }
+
+    float Graph::GetDistanceBetween(int FromNodeId, int ToNodeId) const
+    {
+        auto const FromNode = GetNode(FromNodeId);
+        auto const ToNode = GetNode(ToNodeId);
+        
+        return FVector2d::DistSquared(
+            FromNode->GetPosition(),
+            ToNode->GetPosition()
+        );
     }
 
     bool Graph::RemoveConnection(Connection const* ConnectionToRemove)

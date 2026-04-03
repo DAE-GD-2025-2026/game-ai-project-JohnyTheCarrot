@@ -14,6 +14,12 @@ public:
 		
 		FVector GetP1(TriPolygon const& Poly) const { return Poly.Vertices[EdgeIndices[0]]; }
 		FVector GetP2(TriPolygon const& Poly) const { return Poly.Vertices[EdgeIndices[1]]; }
+		FVector GetMidPoint(TriPolygon const &Poly) const
+		{
+			auto const Edge1Point = GetP1(Poly);
+			auto const Edge2Point = GetP2(Poly);
+			return FMath::Lerp(Edge1Point, Edge2Point, 0.5f);
+		}
 	};
 	
 	struct Triangle
@@ -65,4 +71,34 @@ private:
 	std::vector<FVector>  Vertices;
 	std::vector<Edge> Edges;
 	std::vector<Triangle> Triangles;
+};
+
+template<>
+struct std::hash<TriPolygon::Edge>
+{
+	std::size_t operator()(const TriPolygon::Edge& Edge) const
+	{
+		std::size_t h1 = std::hash<int>{}(std::min(Edge.EdgeIndices[0], Edge.EdgeIndices[1]));
+		std::size_t h2 = std::hash<int>{}(std::max(Edge.EdgeIndices[0], Edge.EdgeIndices[1]));
+		h1 ^= h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2);
+		return h1;
+	}
+};
+
+template<>
+struct std::hash<TriPolygon::Triangle>
+{
+	std::size_t operator()(const TriPolygon::Triangle& Tri) const
+	{
+		// Sort so {A,B,C} in any order hashes the same
+		int indices[3] = { Tri.VertexIndices[0], Tri.VertexIndices[1], Tri.VertexIndices[2] };
+		std::sort(std::begin(indices), std::end(indices));
+
+		std::size_t seed = 0;
+		for (int idx : indices)
+		{
+			seed ^= std::hash<int>{}(idx) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+		}
+		return seed;
+	}
 };
