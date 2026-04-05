@@ -13,6 +13,8 @@ GameAI::NavGraph::NavGraph(std::unique_ptr<TriPolygon> && NavPoly)
 
 GameAI::NavGraph::NavGraph(const NavGraph& Other)
 	: Graph(false)
+	, pNavPoly{std::make_unique<TriPolygon>(*Other.pNavPoly)}
+	, NodeIdToEdgeIndex{Other.NodeIdToEdgeIndex}
 {
 	Nodes.reserve(Other.Nodes.size());
 	for (std::unique_ptr<Node> const & OtherNode : Other.Nodes)
@@ -48,6 +50,18 @@ int GameAI::NavGraph::GetNodeIdFromEdgeIndex(int EdgeIdx) const
 	return Graphs::InvalidNodeId;
 }
 
+std::optional<std::pair<FVector, FVector>> GameAI::NavGraph::GetEdgeFromNodeId(int NodeId) const
+{
+	if (auto const It = NodeIdToEdgeIndex.find(NodeId); It != NodeIdToEdgeIndex.end())
+	{
+		auto const &Edge = It->second;
+	
+		return std::make_pair(Edge.GetP1(*pNavPoly), Edge.GetP2(*pNavPoly));
+	}
+	
+	return std::nullopt;
+}
+
 void GameAI::NavGraph::CreateNavigationGraph()
 {
 	enum class EdgeConnects
@@ -61,12 +75,12 @@ void GameAI::NavGraph::CreateNavigationGraph()
 	// Edge present => 1st hit we store the first tri, 2nd hit we connect the first with the other tri
 	std::unordered_map<TriPolygon::Edge, TriPolygon::Triangle> EdgeConnectionRegistry{};	
 	
-	// Any edges that **have been found to connect** will be associated with their triangles
-	std::unordered_multimap<TriPolygon::Triangle, int> TriNodes{};
+	// Any edge that **has been found to connect** will have its midpoint associated with its triangle
+	std::unordered_multimap<TriPolygon::Triangle, int> TriMidPointNodes{};
 	
-#pragma region UpdateEdgeConnectionRecord 
 	// Utility function for next step
-	auto UpdateEdgeConnectionRecord = [this, &TriNodes, &EdgeConnectionRegistry](TriPolygon::Edge const &Edge, TriPolygon::Triangle const &Tri)
+#pragma region UpdateEdgeConnectionRecord 
+	auto UpdateEdgeConnectionRecord = [this, &TriMidPointNodes, &EdgeConnectionRegistry](TriPolygon::Edge const &Edge, TriPolygon::Triangle const &Tri)
 	{
 		if (auto const It = EdgeConnectionRegistry.find(Edge); It != EdgeConnectionRegistry.end())
 		{
@@ -74,8 +88,9 @@ void GameAI::NavGraph::CreateNavigationGraph()
 			int const NodeId = AddNode(std::make_unique<Node>(MidPoint));
     
 			auto const FirstTri = It->second;
-			TriNodes.emplace(Tri, NodeId);
-			TriNodes.emplace(FirstTri, NodeId);
+			TriMidPointNodes.emplace(Tri, NodeId);
+			TriMidPointNodes.emplace(FirstTri, NodeId);
+			NodeIdToEdgeIndex.emplace(NodeId, Edge);
 			Tri.MidPointNodeIds.emplace_back(NodeId);
 		}
 		else
@@ -87,7 +102,6 @@ void GameAI::NavGraph::CreateNavigationGraph()
 	
 	// Step 1: we go over all the triangles and take note of any edges we see more than once, as described above
 	auto const &Triangles = pNavPoly->GetTriangles();
-	UE_LOG(LogTemp, Log, TEXT("triangles %d"), Triangles.size());
 	for (auto const &Triangle : Triangles)
 	{
 		auto const [E1, E2, E3] = Triangle.GetEdges();
@@ -96,20 +110,18 @@ void GameAI::NavGraph::CreateNavigationGraph()
 		UpdateEdgeConnectionRecord(E3, Triangle);
 	}
 	
-	UE_LOG(LogTemp, Log, TEXT("TriNodes %d"), TriNodes.size());
-	
 	std::unordered_set<TriPolygon::Triangle> ProcessedTris{};
 	// Step 2: We go over all the Triangles with which connecting edges are associated
-	for (TriPolygon::Triangle const &Triangle : TriNodes | std::views::keys)
+	for (TriPolygon::Triangle const &Triangle : TriMidPointNodes | std::views::keys)
 	{
 		if (!ProcessedTris.insert(Triangle).second) continue;
 		
-		auto const [begin, end] = TriNodes.equal_range(Triangle);
+		auto const [begin, end] = TriMidPointNodes.equal_range(Triangle);
 		
 		// Each node associated with the triangle gets connected with its siblings
 		for (auto It = begin; It != end; ++It)
 		{
-			for (auto [_, OtherNodeId] : std::ranges::subrange(It, end))
+			for (auto OtherNodeId : std::ranges::subrange(It, end) | std::views::values)
 			{
 				auto const NodeId = It->second;
 				
@@ -118,7 +130,6 @@ void GameAI::NavGraph::CreateNavigationGraph()
 			}
 		}
 	}
-	SetConnectionCostsToDistances();
 	
-	UE_LOG(LogTemp, Log, TEXT("hi %d"), GetNodeCount());
+	SetConnectionCostsToDistances();
 }
