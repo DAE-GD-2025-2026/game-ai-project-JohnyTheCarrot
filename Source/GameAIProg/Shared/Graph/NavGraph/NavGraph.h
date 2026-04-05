@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Movement/Pathfinding/Navmesh/TriPolygon.h"
 #include "Shared/Graph/Graph.h"
+#include <unordered_map>
 
 namespace GameAI
 {
